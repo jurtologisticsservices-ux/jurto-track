@@ -42,7 +42,7 @@ async function q(promise) {
 }
 
 /* ---------------- state ---------------- */
-const S = { user: null, admin: null, route: 'dashboard', dash: null, vtypes: {}, channel: null, live: false, maps: [], cleanup: [] };
+const S = { user: null, admin: null, route: 'dashboard', dash: null, vtypes: {}, channel: null, live: false, maps: [], charts: [], cleanup: [] };
 
 /* ---------------- toasts / modal / drawer ---------------- */
 function toast(msg, kind = '') {
@@ -190,22 +190,50 @@ async function boot() {
   route();
 }
 
+/* ---------------- icons (line style) ---------------- */
+const ICONS = {
+  dashboard: '<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
+  live: '<path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/>',
+  orders: '<path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>',
+  drivers: '<path d="M1 5h13v11H1zM14 9h4l3 3.5V16h-7z"/><circle cx="5.5" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/>',
+  customers: '<circle cx="9" cy="8" r="4"/><path d="M1.5 21a7.5 7.5 0 0 1 15 0"/><path d="M16 4.2a4 4 0 0 1 0 7.6M22.5 21a7.5 7.5 0 0 0-4.5-6.9"/>',
+  fleets: '<rect x="4" y="2" width="16" height="20" rx="1.5"/><path d="M9 22v-4h6v4M8 6h2M14 6h2M8 10h2M14 10h2M8 14h2M14 14h2"/>',
+  payouts: '<rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20M16 15h2M6 6V4h12v2"/>',
+  pricing: '<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h8"/>',
+  promos: '<path d="M3 7h18v3.5a2 2 0 0 0 0 4V18H3v-3.5a2 2 0 0 0 0-4z"/><path d="M14 7v11" stroke-dasharray="2 2.5"/>',
+  support: '<path d="M3 15v-3a9 9 0 0 1 18 0v3"/><rect x="2" y="14" width="5" height="7" rx="2"/><rect x="17" y="14" width="5" height="7" rx="2"/>',
+  settings: '<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+  bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/>',
+  chev: '<path d="m9 6 6 6-6 6"/>',
+  menu: '<path d="M3 6h18M3 12h18M3 18h18"/>',
+  logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
+  rupee: '<path d="M6 3h12M6 8h12M6 13l8.5 8M6 13h3a5 5 0 0 0 0-10"/>',
+  check: '<circle cx="12" cy="12" r="10"/><path d="m8 12 3 3 5-6"/>',
+  xc: '<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/>',
+  activity: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+  file: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/>',
+  shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
+  bank: '<path d="M3 21h18M5 21V10M19 21V10M9 21V10M15 21V10M2 10l10-7 10 7z"/>',
+};
+const ico = (n, size = 18) => `<svg class="i" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n] || ''}</svg>`;
+
 /* ---------------- shell & routing ---------------- */
 const NAV = [
-  ['dashboard', '📊', 'Dashboard'],
-  ['live', '🛰️', 'Live dispatch'],
-  ['orders', '📦', 'Orders'],
-  ['-', 'PEOPLE'],
-  ['drivers', '🚚', 'Drivers', 'drivers_to_verify'],
-  ['customers', '👤', 'Customers'],
-  ['fleets', '🏢', 'Fleet owners', 'fleets_to_verify'],
-  ['-', 'MONEY'],
-  ['payouts', '💸', 'Payouts & dues', 'payouts_pending'],
-  ['pricing', '🧮', 'Pricing'],
-  ['promos', '🎁', 'Promo codes'],
-  ['-', 'SYSTEM'],
-  ['support', '🎧', 'Support', 'tickets_open'],
-  ['settings', '⚙️', 'Settings'],
+  ['dashboard', 'dashboard', 'Dashboard'],
+  ['live', 'live', 'Live dispatch'],
+  ['orders', 'orders', 'Orders'],
+  ['-', 'People'],
+  ['drivers', 'drivers', 'Drivers', 'drivers_to_verify'],
+  ['customers', 'customers', 'Customers'],
+  ['fleets', 'fleets', 'Fleet owners', 'fleets_to_verify'],
+  ['-', 'Money'],
+  ['payouts', 'payouts', 'Payouts & dues', 'payouts_pending'],
+  ['pricing', 'pricing', 'Pricing'],
+  ['promos', 'promos', 'Promo codes'],
+  ['-', 'System'],
+  ['support', 'support', 'Support', 'tickets_open'],
+  ['settings', 'settings', 'Settings'],
 ];
 const TITLES = Object.fromEntries(NAV.filter((n) => n[0] !== '-').map((n) => [n[0], n[2]]));
 
@@ -215,15 +243,17 @@ function renderShell() {
   <div class="shell">
     <nav class="side" id="side">
       <div class="brand"><div class="logo">J</div><div><b>JURTO</b><small>OPS CONSOLE</small></div></div>
-      ${NAV.map((n) => n[0] === '-' ? `<div class="sep">${n[1]}</div>` : `<a class="nav" href="#/${n[0]}" data-r="${n[0]}"><span class="ic">${n[1]}</span>${n[2]}${n[3] && qd[n[3]] ? `<span class="count">${qd[n[3]]}</span>` : ''}</a>`).join('')}
-      <div class="me"><b>${esc(S.admin.first_name || S.admin.email)}</b>${esc(S.admin.admin_roles?.role_name || 'admin')}<br><a href="#" id="logout" class="muted">Sign out</a></div>
+      ${NAV.map((n) => n[0] === '-' ? `<div class="sep">${n[1]}</div>` : `<a class="nav" href="#/${n[0]}" data-r="${n[0]}">${ico(n[1])}<span>${n[2]}</span>${n[3] && qd[n[3]] ? `<span class="count">${qd[n[3]]}</span>` : ''}</a>`).join('')}
+      <div class="me"><span class="avatar sm">${esc(initial(S.admin))}</span><div><b>${esc(S.admin.first_name || S.admin.email)}</b><small>${esc((S.admin.admin_roles?.role_name || 'admin').replace('_', ' '))}</small></div><a href="#" id="logout" class="icon-btn" title="Sign out">${ico('logout', 16)}</a></div>
     </nav>
     <div class="main">
       <header class="top">
-        <button class="btn sm menu-btn" id="menu">☰</button>
-        <div><h2 id="ptitle"></h2><div class="sub" id="psub"></div></div>
+        <button class="icon-btn menu-btn" id="menu" aria-label="Menu">${ico('menu')}</button>
+        <div class="ttl"><div class="crumb">JURTO Ops <span>/</span> <span id="pcrumb"></span></div><h2 id="ptitle"></h2><div class="sub" id="psub"></div></div>
         <div class="grow"></div>
+        <label class="gsearch">${ico('search', 16)}<input id="gq" placeholder="Search orders, phone, address…" autocomplete="off"></label>
         <span class="live off" id="live"><span class="dot"></span>CONNECTING</span>
+        <a class="icon-btn bell" href="#/dashboard" title="Needs attention">${ico('bell')}${S.dash ? (() => { const n = Object.values(S.dash.queue || {}).reduce((a, b) => a + num(b), 0); return n ? `<span class="badge">${n}</span>` : ''; })() : ''}</a>
         <span class="clock" id="clock"></span>
       </header>
       <main class="page" id="page"></main>
@@ -231,6 +261,12 @@ function renderShell() {
   </div>`;
   $('#logout').onclick = async (e) => { e.preventDefault(); await sb.auth.signOut(); renderLogin(); };
   $('#menu').onclick = () => $('#side').classList.toggle('open');
+  $('#gq').onkeydown = (e) => {
+    if (e.key !== 'Enter') return;
+    S.ordersQ = e.target.value.trim();
+    S.ordersTab = 'all';
+    if (S.route === 'orders') route(); else location.hash = '#/orders';
+  };
   const tick = () => { const c = $('#clock'); if (c) c.textContent = new Date().toLocaleString('en-IN', { weekday: 'short', hour: 'numeric', minute: '2-digit', second: '2-digit', timeZone: 'Asia/Kolkata' }); };
   tick();
   clearInterval(S.clockT);
@@ -245,6 +281,8 @@ function route() {
   $$('.nav').forEach((a) => a.classList.toggle('on', a.dataset.r === S.route));
   $('#side')?.classList.remove('open');
   $('#ptitle').textContent = TITLES[S.route];
+  $('#pcrumb').textContent = TITLES[S.route];
+  for (const c of S.charts.splice(0)) try { c.destroy(); } catch (_) {}
   $('#psub').textContent = '';
   closeDrawer();
   PAGES[S.route]($('#page')).catch(fail);
@@ -281,9 +319,10 @@ function stopLive() {
 /* ---------------- map ---------------- */
 function makeMap(el, zoom = 11) {
   const m = L.map(el, { zoomControl: true, attributionControl: true }).setView(CHENNAI, zoom);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    maxZoom: 19, subdomains: 'abcd',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+  // OpenStreetMap tiles, darkened to the console's navy with a CSS filter (.dark-tiles)
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19, className: 'dark-tiles',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   }).addTo(m);
   S.maps.push(m);
   return m;
@@ -337,45 +376,98 @@ function paintMap(m, { drivers, active, busy }, layer) {
 const PAGES = {};
 
 /* ---------- dashboard ---------- */
+const CH = { blue: '#5B7CC4', blueSoft: 'rgba(91,124,196,.22)', red: '#E00000', redSoft: '#7A1E2A', amber: '#C9A227', grid: 'rgba(138,151,178,.10)', tick: '#6B7896' };
+function chart(el, cfg) {
+  if (!window.Chart || !el) return null;
+  Chart.defaults.color = CH.tick;
+  Chart.defaults.font.family = 'Inter, system-ui, sans-serif';
+  Chart.defaults.font.size = 11;
+  const c = new Chart(el, cfg);
+  S.charts.push(c);
+  return c;
+}
+const tooltip = { backgroundColor: '#16213A', borderColor: '#2A3958', borderWidth: 1, titleColor: '#E8EDF7', bodyColor: '#C9D2E5', padding: 10, cornerRadius: 10, displayColors: true, boxPadding: 4 };
+function spark(vals, color) {
+  const w = 110, h = 34, max = Math.max(1, ...vals), n = vals.length;
+  const pts = vals.map((v, i) => [(i / Math.max(1, n - 1)) * w, h - 3 - (v / max) * (h - 8)]);
+  const line = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+  const id = 'g' + Math.random().toString(36).slice(2, 8);
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity=".35"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>
+    <path d="${line} L${w} ${h} L0 ${h} Z" fill="url(#${id})"/><path d="${line}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+}
+function delta(now, before, goodWhenUp = true) {
+  now = num(now); before = num(before);
+  if (!now && !before) return `<span class="delta flat">— same as yesterday</span>`;
+  if (!before) return `<span class="delta ${goodWhenUp ? 'up' : 'down'}">▲ new vs yesterday</span>`;
+  const pct = Math.round(((now - before) / before) * 100);
+  if (!pct) return `<span class="delta flat">— same as yesterday</span>`;
+  const good = pct > 0 === goodWhenUp;
+  return `<span class="delta ${good ? 'up' : 'down'}">${pct > 0 ? '▲' : '▼'} ${Math.abs(pct)}% vs yesterday</span>`;
+}
+
 PAGES.dashboard = async (el, quiet) => {
   const [d, recent] = await Promise.all([
     q(sb.rpc('admin_dashboard')),
-    q(sb.from('orders').select('id,status,created_at,estimated_fare,final_fare,pickup_address,dropoff_address,vehicle_type_id,customers(first_name,last_name)').order('created_at', { ascending: false }).limit(8)),
+    q(sb.from('orders').select('id,status,created_at,estimated_fare,final_fare,pickup_address,dropoff_address,vehicle_type_id,customers(first_name,last_name,phone)').order('created_at', { ascending: false }).limit(8)),
   ]);
   S.dash = d;
-  const t = d.today, lv = d.live, qd = d.queue;
-  $('#psub').textContent = 'Chennai · today since midnight IST';
-  const maxN = Math.max(1, ...d.week.map((w) => w.orders));
-  const kpi = (ico, lbl, val, hint, cls = '') => `<div class="card kpi ${cls}"><span class="ico">${ico}</span><div class="lbl">${lbl}</div><div class="val">${val}</div><div class="hint">${hint}</div></div>`;
-  const qq = (key, n, t2, r) => `<a class="q ${n ? 'hot' : ''}" href="#/${r}"><div class="n">${n}</div><div class="t">${t2}</div></a>`;
+  const t = d.today || {}, y = d.yesterday || {}, lv = d.live || {}, qd = d.queue || {};
+  const tr = d.trend || d.week || [];
+  const col = (k) => tr.map((x) => num(x[k]));
+  $('#psub').textContent = 'Chennai · ' + new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Asia/Kolkata' });
+  const kpi = (icon, tone, lbl, val, foot, sp) => `<div class="card kpi"><div class="kh"><span class="kic ${tone}">${ico(icon, 17)}</span><span class="lbl">${lbl}</span></div>
+    <div class="kb"><div><div class="val">${val}</div>${foot}</div>${sp || ''}</div></div>`;
+  const rate = t.orders ? Math.round((t.completed / t.orders) * 100) : 0;
+  const queue = [
+    ['shield', 'Drivers to verify', qd.drivers_to_verify, 'drivers'],
+    ['file', 'Documents pending', qd.docs_pending, 'drivers'],
+    ['fleets', 'Fleets to verify', qd.fleets_to_verify, 'fleets'],
+    ['bank', 'Payout requests', qd.payouts_pending, 'payouts'],
+    ['support', 'Open tickets', qd.tickets_open, 'support'],
+  ];
+  const qTotal = queue.reduce((a, x) => a + num(x[2]), 0);
+  const st = d.status_7d || {};
+  const stTotal = Object.values(st).reduce((a, b) => a + num(b), 0);
   const html = `
   <div class="grid kpis">
-    ${kpi('📦', 'Orders today', t.orders, `${t.active} active now`)}
-    ${kpi('✅', 'Delivered', t.completed, t.orders ? Math.round((t.completed / t.orders) * 100) + '% completion' : 'no orders yet')}
-    ${kpi('💰', 'GMV', rupees(t.gmv), 'delivered fares', 'accent')}
-    ${kpi('🏦', 'JURTO earnings', rupees(t.commission), `− ${rupees(t.discounts)} promos & coins`)}
-    ${kpi('🟢', 'Drivers online', `${lv.drivers_online}<span class="dim" style="font-size:16px"> / ${lv.drivers_total}</span>`, `${lv.on_trip} on a trip`)}
-    ${kpi('⚠️', 'Cancelled', t.cancelled, `${t.no_driver} with no driver found`)}
+    ${kpi('orders', 'blue', 'Orders today', num(t.orders), delta(t.orders, y.orders), spark(col('orders'), CH.blue))}
+    ${kpi('check', 'green', 'Delivered', num(t.completed), `<span class="delta flat">${t.orders ? rate + '% completion' : 'no orders yet'}</span>`, spark(col('completed'), '#4FA77A'))}
+    ${kpi('rupee', 'red', 'GMV', rupees(t.gmv), delta(t.gmv, y.gmv), spark(col('gmv'), CH.red))}
+    ${kpi('bank', 'violet', 'JURTO earnings', rupees(t.commission), delta(t.commission, y.commission), spark(col('commission'), '#8B7CC4'))}
+    ${kpi('drivers', 'green', 'Drivers online', `${num(lv.drivers_online)}<small> / ${num(lv.drivers_total)}</small>`, `<span class="delta flat">${num(lv.on_trip)} on a trip · ${num(lv.pending)} waiting</span>`)}
+    ${kpi('xc', 'amber', 'Cancelled today', num(t.cancelled), delta(t.cancelled, y.cancelled, false), spark(col('cancelled'), CH.amber))}
   </div>
-  <div class="card" style="margin-top:14px"><h3>Needs attention</h3><div class="queue">
-    ${qq('d', qd.drivers_to_verify, 'Drivers to verify', 'drivers')}
-    ${qq('doc', qd.docs_pending, 'Documents pending', 'drivers')}
-    ${qq('f', qd.fleets_to_verify, 'Fleets to verify', 'fleets')}
-    ${qq('p', qd.payouts_pending, 'Payout requests', 'payouts')}
-    ${qq('t', qd.tickets_open, 'Open tickets', 'support')}
-  </div></div>
-  <div class="grid two" style="margin-top:14px">
-    <div class="card"><h3>Live map<span class="grow"></span><a class="btn sm" href="#/live">Open dispatch →</a></h3><div class="mapbox" id="dmap"></div></div>
-    <div class="card"><h3>Last 7 days</h3>
-      <div class="bars">${d.week.map((w, i) => `<div class="bar ${i === d.week.length - 1 ? 'today' : ''}" title="${w.orders} orders, ${w.completed} delivered, ${rupees(w.gmv)}">
-        <div class="v">${w.orders}</div>
-        <div class="col" style="height:${Math.max(3, (w.orders / maxN) * 120)}px"><div class="done" style="height:${w.orders ? (w.completed / w.orders) * 100 : 0}%"></div></div>
-        <div class="d">${new Date(w.day).toLocaleDateString('en-IN', { weekday: 'short' })}</div></div>`).join('')}</div>
-      <div class="legend"><span><i style="background:#2B3B60"></i>Orders</span><span><i style="background:var(--red)"></i>Delivered</span><span class="grow"></span><span>All time: <b>${d.totals.orders}</b> orders · <b>${d.totals.customers}</b> customers</span></div>
+
+  <div class="grid two" style="margin-top:16px">
+    <div class="card"><div class="ch"><div><h3>Orders & revenue</h3><div class="cs">Last 14 days · bars = orders, line = GMV</div></div>
+      <div class="kstat"><b>${tr.reduce((a, x) => a + num(x.orders), 0)}</b><span>orders</span></div><div class="kstat"><b>${rupees(tr.reduce((a, x) => a + num(x.gmv), 0))}</b><span>GMV</span></div></div>
+      <div class="chartbox tall"><canvas id="c_trend"></canvas></div></div>
+    <div class="card"><div class="ch"><div><h3>Order status</h3><div class="cs">Last 7 days</div></div></div>
+      <div class="donut"><div class="chartbox"><canvas id="c_status"></canvas></div><div class="dc"><b>${stTotal}</b><span>orders</span></div></div>
+      <div class="dl">${[['completed', 'Delivered', CH.blue], ['cancelled', 'Cancelled', CH.redSoft], ['active', 'Active / scheduled', CH.amber]].map(([k, l, c]) => {
+        const n = k === 'active' ? num(st.pending) + num(st.accepted) + num(st.in_transit) + num(st.scheduled) : num(st[k]);
+        return `<div><i style="background:${c}"></i>${l}<span class="grow"></span><b>${n}</b><span class="dim">${stTotal ? Math.round((n / stTotal) * 100) : 0}%</span></div>`;
+      }).join('')}</div></div>
+  </div>
+
+  <div class="grid two" style="margin-top:16px">
+    <div class="card"><div class="ch"><div><h3>Live map</h3><div class="cs">${num(lv.drivers_online)} drivers online · ${num(lv.pending) + num(lv.on_trip)} live orders</div></div><a class="btn sm" href="#/live">Open dispatch ${ico('chev', 14)}</a></div><div class="mapbox" id="dmap"></div></div>
+    <div class="card"><div class="ch"><div><h3>Needs attention</h3><div class="cs">${qTotal ? qTotal + ' items waiting for you' : 'All clear'}</div></div></div>
+      <div class="qlist">${queue.map(([i, l, n, r]) => `<a class="qi ${num(n) ? 'hot' : ''}" href="#/${r}"><span class="kic ${num(n) ? 'red' : 'grey'}">${ico(i, 16)}</span><span>${l}</span><span class="grow"></span><b>${num(n)}</b>${ico('chev', 14)}</a>`).join('')}</div>
+      <div class="mini"><div><span>All-time orders</span><b>${num(d.totals?.orders)}</b></div><div><span>Delivered</span><b>${num(d.totals?.completed)}</b></div><div><span>Customers</span><b>${num(d.totals?.customers)}</b></div></div>
     </div>
   </div>
-  <div class="card" style="margin-top:14px"><h3>Latest orders<span class="grow"></span><a class="btn sm" href="#/orders">All orders →</a></h3>
+
+  <div class="grid two even" style="margin-top:16px">
+    <div class="card"><div class="ch"><div><h3>Orders by hour</h3><div class="cs">Today · find your peak time</div></div></div><div class="chartbox"><canvas id="c_hours"></canvas></div></div>
+    <div class="card"><div class="ch"><div><h3>Vehicle mix</h3><div class="cs">Last 7 days</div></div></div>
+      ${(d.vehicles_7d || []).length ? `<div class="hbars">${(() => { const vs = d.vehicles_7d, mx = Math.max(...vs.map((v) => v.orders)); return vs.map((v) => `<div class="hb"><span class="nm">${esc(v.name)}</span><div class="tr"><div style="width:${(v.orders / mx) * 100}%"></div></div><b>${v.orders}</b></div>`).join(''); })()}</div>` : `<div class="empty small">No orders in the last 7 days</div>`}
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px"><div class="ch"><div><h3>Latest orders</h3><div class="cs">Click a row for the full timeline</div></div><a class="btn sm" href="#/orders">All orders ${ico('chev', 14)}</a></div>
     ${orderTable(recent)}</div>`;
+  for (const c of S.charts.splice(0)) try { c.destroy(); } catch (_) {}
   if (quiet && $('#dmap')) {
     // refresh numbers without rebuilding the map
     const keepMap = $('#dmap');
@@ -387,6 +479,39 @@ PAGES.dashboard = async (el, quiet) => {
     S.dlayer = null;
   }
   wireOrderRows(el);
+  const anim = quiet ? false : { duration: 700 };
+  chart($('#c_trend'), {
+    data: {
+      labels: tr.map((x) => new Date(x.day + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })),
+      datasets: [
+        { type: 'bar', label: 'Delivered', data: col('completed'), backgroundColor: CH.blue, borderRadius: 4, stack: 'o', yAxisID: 'y', maxBarThickness: 26 },
+        { type: 'bar', label: 'Cancelled', data: col('cancelled'), backgroundColor: CH.redSoft, borderRadius: 4, stack: 'o', yAxisID: 'y', maxBarThickness: 26 },
+        { type: 'bar', label: 'Other', data: tr.map((x) => Math.max(0, num(x.orders) - num(x.completed) - num(x.cancelled))), backgroundColor: '#2B3B60', borderRadius: 4, stack: 'o', yAxisID: 'y', maxBarThickness: 26 },
+        { type: 'line', label: 'GMV ₹', data: col('gmv'), borderColor: CH.red, backgroundColor: CH.red, pointRadius: 2.5, pointHoverRadius: 5, borderWidth: 2, tension: .35, yAxisID: 'y1' },
+      ],
+    },
+    options: {
+      animation: anim, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true, pointStyle: 'rectRounded', padding: 14 } }, tooltip: { ...tooltip, callbacks: { label: (c) => ` ${c.dataset.label}: ${c.dataset.yAxisID === 'y1' ? rupees(c.raw) : c.raw}` } } },
+      scales: {
+        x: { stacked: true, grid: { display: false }, border: { display: false } },
+        y: { stacked: true, beginAtZero: true, grid: { color: CH.grid }, border: { display: false }, ticks: { precision: 0 } },
+        y1: { position: 'right', beginAtZero: true, grid: { display: false }, border: { display: false }, ticks: { callback: (v) => '₹' + (v >= 1000 ? Math.round(v / 1000) + 'k' : v) } },
+      },
+    },
+  });
+  const active = num(st.pending) + num(st.accepted) + num(st.in_transit) + num(st.scheduled);
+  chart($('#c_status'), {
+    type: 'doughnut',
+    data: { labels: ['Delivered', 'Cancelled', 'Active'], datasets: [{ data: stTotal ? [num(st.completed), num(st.cancelled), active] : [1], backgroundColor: stTotal ? [CH.blue, CH.redSoft, CH.amber] : ['#1F2B45'], borderWidth: 0, hoverOffset: 4 }] },
+    options: { animation: anim, maintainAspectRatio: false, cutout: '74%', plugins: { legend: { display: false }, tooltip: stTotal ? tooltip : { enabled: false } } },
+  });
+  const hrs = d.hours_today || Array(24).fill(0);
+  chart($('#c_hours'), {
+    type: 'bar',
+    data: { labels: hrs.map((_, h) => (h % 12 || 12) + (h < 12 ? 'a' : 'p')), datasets: [{ label: 'Orders', data: hrs, backgroundColor: hrs.map((v) => (v && v === Math.max(...hrs) ? CH.red : CH.blue)), borderRadius: 3, maxBarThickness: 14 }] },
+    options: { animation: anim, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip }, scales: { x: { grid: { display: false }, border: { display: false }, ticks: { maxRotation: 0, autoSkip: true, autoSkipPadding: 6 } }, y: { beginAtZero: true, grid: { color: CH.grid }, border: { display: false }, ticks: { precision: 0 } } } },
+  });
   const live = await liveData();
   S.dlayer = paintMap(S.dmap, live, S.dlayer).layer;
   setTimeout(() => S.dmap?.invalidateSize(), 50);
