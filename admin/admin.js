@@ -6,6 +6,10 @@ const SB_URL = 'https://nflgbrdrtsrdvqrjcwmh.supabase.co';
 const SB_KEY = 'sb_publishable_yq-Sc5bxBlcS73lDfZpmlg_RMtybD3m';
 const TRACK_BASE = 'https://jurtologisticsservices-ux.github.io/jurto-track/';
 const CHENNAI = [13.0827, 80.2707];
+// Read the email-link result before the Supabase client tidies the address bar.
+const LINK = new URLSearchParams(location.hash.replace(/^#/, ''));
+const RECOVERY = LINK.get('type') === 'recovery';
+const LINK_ERROR = LINK.get('error_description');
 const sb = window.supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
 
 /* ---------------- helpers ---------------- */
@@ -138,13 +142,38 @@ function renderLogin(msg = '') {
     const email = $('[name=email]').value.trim();
     if (!email) return ($('#lerr').textContent = 'Type your email first');
     const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.href.split('#')[0] });
-    $('#lerr').textContent = error ? error.message : 'Password reset link sent to ' + email;
+    $('#lerr').textContent = error ? error.message : 'Reset link sent to ' + email + '. Open it once, on this device.';
+  };
+}
+
+function renderSetPassword(msg = '') {
+  stopLive();
+  $('#app').innerHTML = `
+  <div class="login"><form class="login-card" id="pf">
+    <div class="brand"><div class="logo">J</div><div><b>JURTO</b><small>OPS CONSOLE</small></div></div>
+    <h1>Set a new password</h1><p>Choose a password with at least 8 characters.</p>
+    <label class="field"><span>New password</span><input class="input" name="p1" type="password" autocomplete="new-password" minlength="8" required></label>
+    <label class="field"><span>Type it again</span><input class="input" name="p2" type="password" autocomplete="new-password" minlength="8" required></label>
+    <div class="err" id="perr">${esc(msg)}</div>
+    <button class="btn primary block" id="pbtn">Save password</button>
+  </form></div>`;
+  $('#pf').onsubmit = async (e) => {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    if (f.get('p1') !== f.get('p2')) return ($('#perr').textContent = 'The two passwords are not the same');
+    $('#pbtn').disabled = true;
+    const { error } = await sb.auth.updateUser({ password: f.get('p1') });
+    $('#pbtn').disabled = false;
+    if (error) return ($('#perr').textContent = error.message);
+    toast('Password saved', 'ok');
+    location.hash = '#/dashboard';
+    boot();
   };
 }
 
 async function boot() {
   const { data: { session } } = await sb.auth.getSession();
-  if (!session) return renderLogin();
+  if (!session) return renderLogin(LINK_ERROR ? 'That email link has expired or was already used. Ask for a new one below.' : '');
   S.user = session.user;
   try {
     S.admin = await q(sb.from('admin_users').select('email,first_name,is_active,admin_roles(role_name)').eq('auth_user_id', S.user.id).maybeSingle());
@@ -220,7 +249,7 @@ function route() {
   closeDrawer();
   PAGES[S.route]($('#page')).catch(fail);
 }
-window.addEventListener('hashchange', () => S.user && route());
+window.addEventListener('hashchange', () => S.user && $('#page') && route());
 
 /* ---------------- realtime ---------------- */
 const refreshSoon = debounce(() => {
@@ -851,6 +880,14 @@ PAGES.settings = async (el) => {
 };
 
 /* ---------------- start ---------------- */
-sb.auth.onAuthStateChange((ev) => { if (ev === 'SIGNED_OUT') renderLogin(); });
-if (!location.hash) location.hash = '#/dashboard';
-boot();
+sb.auth.onAuthStateChange((ev) => {
+  if (ev === 'SIGNED_OUT') renderLogin();
+  if (ev === 'PASSWORD_RECOVERY') setTimeout(() => renderSetPassword(), 0);
+});
+if (RECOVERY) {
+  // opened from the reset-password email: wait for the link's session, then ask for the new password
+  sb.auth.getSession().then(({ data: { session } }) => (session ? renderSetPassword() : renderLogin('That email link has expired or was already used. Ask for a new one below.')));
+} else {
+  if (!location.hash || LINK_ERROR) location.hash = '#/dashboard';
+  boot();
+}
