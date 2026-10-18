@@ -215,7 +215,16 @@ const ICONS = {
   file: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/>',
   shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
   bank: '<path d="M3 21h18M5 21V10M19 21V10M9 21V10M15 21V10M2 10l10-7 10 7z"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  moon: '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',
 };
+// Light (white) or dark workspace, remembered on this device
+const theme = () => document.documentElement.dataset.theme || 'dark';
+function setTheme(t) {
+  document.documentElement.dataset.theme = t;
+  try { localStorage.setItem('jurto_theme', t); } catch (_) {}
+}
+try { setTheme(localStorage.getItem('jurto_theme') || 'dark'); } catch (_) {}
 const ico = (n, size = 18) => `<svg class="i" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n] || ''}</svg>`;
 
 /* ---------------- shell & routing ---------------- */
@@ -254,6 +263,7 @@ function renderShell() {
         <label class="gsearch">${ico('search', 16)}<input id="gq" placeholder="Search orders, phone, address…" autocomplete="off"></label>
         <span class="live off" id="live"><span class="dot"></span>CONNECTING</span>
         <a class="icon-btn bell" href="#/dashboard" title="Needs attention">${ico('bell')}${S.dash ? (() => { const n = Object.values(S.dash.queue || {}).reduce((a, b) => a + num(b), 0); return n ? `<span class="badge">${n}</span>` : ''; })() : ''}</a>
+        <button class="icon-btn theme-btn" id="theme" title="Light / dark">${ico(theme() === 'light' ? 'moon' : 'sun')}</button>
         <span class="clock" id="clock"></span>
       </header>
       <main class="page" id="page"></main>
@@ -261,6 +271,11 @@ function renderShell() {
   </div>`;
   $('#logout').onclick = async (e) => { e.preventDefault(); await sb.auth.signOut(); renderLogin(); };
   $('#menu').onclick = () => $('#side').classList.toggle('open');
+  $('#theme').onclick = () => {
+    setTheme(theme() === 'light' ? 'dark' : 'light');
+    $('#theme').innerHTML = ico(theme() === 'light' ? 'moon' : 'sun');
+    if (['dashboard'].includes(S.route)) PAGES.dashboard($('#page'), true).catch(() => {});
+  };
   $('#gq').onkeydown = (e) => {
     if (e.key !== 'Enter') return;
     S.ordersQ = e.target.value.trim();
