@@ -301,7 +301,7 @@ function startLive() {
       if (p.eventType === 'UPDATE' && p.old?.status !== p.new.status && p.new.status === 'cancelled') toast(`❌ Order <b>#${shortId(p.new.id)}</b> cancelled`, 'bad');
       refreshSoon();
     })
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'driver_locations' }, () => { if (S.route === 'live' || S.route === 'dashboard') refreshSoon(); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'driver_locations' }, (p) => { if (S.route === 'live' || S.route === 'dashboard') moveDriver(p.new); })
     .subscribe((st) => {
       S.live = st === 'SUBSCRIBED';
       const el = $('#live');
@@ -382,6 +382,44 @@ async function liveData() {
   return { drivers, active, busy };
 }
 
+// Driver trails are built from the positions seen while the console is open (the app keeps one row per
+// driver and updates it), so a trail grows as a driver moves.
+S.trails = new Map();
+function trailPush(id, p) {
+  const t = S.trails.get(id) || [];
+  const last = t[t.length - 1];
+  if (!last || Math.abs(last[0] - p[0]) + Math.abs(last[1] - p[1]) > 0.00004) t.push(p);
+  if (t.length > 60) t.shift();
+  S.trails.set(id, t);
+  return t;
+}
+function glide(mk, to, ms = 1600) {
+  const from = mk.getLatLng();
+  if (Math.abs(from.lat - to[0]) + Math.abs(from.lng - to[1]) < 1e-7) return;
+  cancelAnimationFrame(mk._anim);
+  const t0 = performance.now();
+  const step = (now) => {
+    const k = Math.min(1, (now - t0) / ms), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+    mk.setLatLng([from.lat + (to[0] - from.lat) * e, from.lng + (to[1] - from.lng) * e]);
+    if (k < 1) mk._anim = requestAnimationFrame(step);
+  };
+  mk._anim = requestAnimationFrame(step);
+}
+function moveDriver(r) {
+  if (!r?.driver_id || r.latitude == null) return;
+  const p = [num(r.latitude), num(r.longitude)];
+  let known = false;
+  for (const m of S.maps) {
+    const d = m._drv?.get(r.driver_id);
+    if (!d) continue;
+    known = true;
+    if (r.is_online === false) continue;
+    glide(d.mk, p);
+    d.tr.setLatLngs(trailPush(r.driver_id, p));
+  }
+  if (!known || r.is_online === false) refreshSoon();
+}
+
 function paintMap(m, { drivers, active, busy }, layer) {
   if (layer) layer.clearLayers(); else layer = L.layerGroup().addTo(m);
   const pts = [];
@@ -397,19 +435,39 @@ function paintMap(m, { drivers, active, busy }, layer) {
       L.polyline([p, d], { color: o.status === 'pending' ? '#F59E0B' : '#60A5FA', weight: 2, opacity: .55, dashArray: '6 6' }).addTo(layer);
     }
   }
+  if (!m._drv) { m._drv = new Map(); m._dl = L.layerGroup().addTo(m); }
+  const keep = new Set();
   for (const l of drivers) {
     const p = [num(l.latitude), num(l.longitude)];
     pts.push(p);
+    keep.add(l.driver_id);
     const isBusy = busy.has(l.driver_id);
-    L.marker(p, { icon: icon(isBusy ? 'busy' : 'idle', '🚚'), zIndexOffset: 500 })
-      .bindPopup(`<b>${esc(name(l.drivers))}</b><br>${isBusy ? '🟠 On a trip' : '🟢 Free'} · ${ago(l.recorded_at)}<br><a href="tel:${esc(l.drivers?.phone)}">${esc(l.drivers?.phone || '')}</a>`)
-      .on('click', () => openDriver(l.driver_id)).addTo(layer);
+    const trail = trailPush(l.driver_id, p);
+    const popup = `<b>${esc(name(l.drivers))}</b><br>${isBusy ? '🟠 On a trip' : '🟢 Free'} · ${ago(l.recorded_at)}<br><a href="tel:${esc(l.drivers?.phone)}">${esc(l.drivers?.phone || '')}</a>`;
+    let dv = m._drv.get(l.driver_id);
+    if (!dv) {
+      const tr = L.polyline(trail, { color: isBusy ? '#F59E0B' : '#22C55E', weight: 3, opacity: .5, lineCap: 'round' }).addTo(m._dl);
+      const mk = L.marker(p, { icon: icon(isBusy ? 'busy' : 'idle', '🚚'), zIndexOffset: 500 }).on('click', () => openDriver(l.driver_id)).addTo(m._dl);
+      dv = { mk, tr, busy: isBusy };
+      m._drv.set(l.driver_id, dv);
+    } else {
+      glide(dv.mk, p);
+      dv.tr.setLatLngs(trail);
+      if (dv.busy !== isBusy) { dv.mk.setIcon(icon(isBusy ? 'busy' : 'idle', '🚚')); dv.tr.setStyle({ color: isBusy ? '#F59E0B' : '#22C55E' }); dv.busy = isBusy; }
+    }
+    dv.mk.bindPopup(popup);
   }
+  for (const [id, dv] of m._drv) if (!keep.has(id)) { m._dl.removeLayer(dv.mk); m._dl.removeLayer(dv.tr); m._drv.delete(id); }
   return { layer, pts };
 }
 
 /* ================= PAGES ================= */
 const PAGES = {};
+// shared page pieces: a row of summary cards, a search box with an icon, and an empty state
+const stats = (items) => `<div class="grid stats">${items.map(([i, tone, lbl, val, sub]) => `<div class="card stat"><span class="kic ${tone}">${ico(i, 17)}</span><div><div class="lbl">${lbl}</div><div class="val">${val}</div>${sub ? `<div class="sub">${sub}</div>` : ''}</div></div>`).join('')}</div>`;
+const searchBox = (id, ph, val) => `<label class="sbox">${ico('search', 15)}<input id="${id}" placeholder="${esc(ph)}" value="${esc(val || '')}" autocomplete="off"></label>`;
+const empty = (i, text) => `<div class="empty"><span class="eic">${ico(i, 22)}</span><div>${text}</div></div>`;
+const weekAgo = () => Date.now() - 7 * 864e5;
 
 /* ---------- dashboard ---------- */
 const CH = { blue: '#5B7CC4', blueSoft: 'rgba(91,124,196,.22)', red: '#E00000', redSoft: '#7A1E2A', amber: '#C9A227', grid: 'rgba(138,151,178,.10)', tick: '#6B7896' };
@@ -582,7 +640,7 @@ PAGES.live = async (el, quiet) => {
 
 /* ---------- orders ---------- */
 function orderTable(rows) {
-  if (!rows.length) return `<div class="empty"><div class="e">📭</div>No orders</div>`;
+  if (!rows.length) return empty('orders', 'No orders');
   return `<div class="tbl-wrap" style="border:0"><table><thead><tr><th>Order</th><th>Customer</th><th>Route</th><th>Vehicle</th><th class="right">Fare</th><th>Status</th></tr></thead><tbody>
     ${rows.map((o) => `<tr class="row" data-o="${o.id}">
       <td><b class="mono">#${shortId(o.id)}</b><div class="small muted">${fmtDate(o.created_at)}</div></td>
@@ -605,11 +663,19 @@ PAGES.orders = async (el, quiet) => {
   const term = (S.ordersQ || '').toLowerCase();
   const shown = term ? rows.filter((o) => [o.id, o.pickup_address, o.dropoff_address, name(o.customers), o.customers?.phone].join(' ').toLowerCase().includes(term)) : rows;
   const tabs = [['all', 'All'], ['live', 'Live'], ['scheduled', 'Scheduled'], ['completed', 'Delivered'], ['cancelled', 'Cancelled']];
+  const by = (st) => rows.filter((o) => (Array.isArray(st) ? st.includes(o.status) : o.status === st));
+  const done = by('completed');
   el.innerHTML = `
+  ${tab === 'all' ? stats([
+    ['activity', 'amber', 'Live now', by(['pending', 'accepted', 'in_transit']).length, `${by('pending').length} finding a driver`],
+    ['check', 'green', 'Delivered', done.length, rupees(done.reduce((a, o) => a + num(o.final_fare ?? o.estimated_fare), 0)) + ' in fares'],
+    ['xc', 'red', 'Cancelled', by('cancelled').length, rows.length ? Math.round((by('cancelled').length / rows.length) * 100) + '% of orders' : ''],
+    ['orders', 'blue', 'Scheduled', by('scheduled').length, 'booked for later'],
+  ]) : ''}
   <div class="toolbar">
     <div class="tabs">${tabs.map(([k, l]) => `<button class="tab ${tab === k ? 'on' : ''}" data-t="${k}">${l}</button>`).join('')}</div>
     <div class="grow"></div>
-    <input class="input search" id="oq" placeholder="🔎  Search order ID, phone, address" value="${esc(S.ordersQ || '')}">
+    ${searchBox('oq', 'Search order ID, phone, address', S.ordersQ)}
   </div>
   <div class="tbl-wrap">${orderTable(shown)}</div>
   <p class="small dim">Showing the latest ${rows.length} orders.</p>`;
@@ -719,10 +785,17 @@ PAGES.drivers = async (el) => {
   const term = (S.drvQ || '').toLowerCase();
   if (term) rows = rows.filter((d) => [name(d), d.phone, ...(d.vehicles || []).map((v) => v.registration_number)].join(' ').toLowerCase().includes(term));
   const tabs = [['all', 'All'], ['online', 'Online'], ['verify', 'To verify'], ['dues', 'Owe dues'], ['blocked', 'Blocked']];
+  const oweTotal = Object.values(bal).filter((v) => v < 0).reduce((a, v) => a - v, 0);
   el.innerHTML = `
+  ${stats([
+    ['drivers', 'blue', 'Drivers', counts.all, `${drivers.filter((d) => new Date(d.created_at) > weekAgo()).length} joined this week`],
+    ['activity', 'green', 'Online now', counts.online, `${drivers.filter((d) => d.is_verified && d.is_active).length} verified`],
+    ['shield', counts.verify ? 'red' : 'grey', 'To verify', counts.verify, 'new drivers or documents'],
+    ['rupee', counts.dues ? 'amber' : 'grey', 'Dues owed', rupees(oweTotal), `${counts.dues} drivers`],
+  ])}
   <div class="toolbar">
     <div class="tabs">${tabs.map(([k, l]) => `<button class="tab ${tab === k ? 'on' : ''}" data-t="${k}">${l}<span class="c">${counts[k]}</span></button>`).join('')}</div>
-    <div class="grow"></div><input class="input search" id="dq" placeholder="🔎  Name, phone, vehicle number" value="${esc(S.drvQ || '')}">
+    <div class="grow"></div>${searchBox('dq', 'Name, phone, vehicle number', S.drvQ)}
   </div>
   <div class="tbl-wrap">${rows.length ? `<table><thead><tr><th>Driver</th><th>Vehicle</th><th>Status</th><th class="right">Trips</th><th class="right">Rating</th><th class="right">Wallet</th><th>Joined</th></tr></thead><tbody>
     ${rows.map((d) => {
@@ -730,13 +803,13 @@ PAGES.drivers = async (el) => {
       const b = bal[d.id] || 0;
       const pend = (d.driver_documents || []).filter((x) => x.status === 'pending').length;
       return `<tr class="row" data-d="${d.id}">
-        <td><div class="who"><span class="avatar">${initial(d)}</span><div><b>${esc(name(d))}</b><small>${esc(d.phone || '')}${d.fleet_owners ? ' · 🏢 ' + esc(d.fleet_owners.business_name || 'Fleet') : ''}</small></div></div></td>
+        <td><div class="who"><span class="avatar">${initial(d)}</span><div><b>${esc(name(d))}</b><small>${esc(d.phone || '')}${d.fleet_owners ? ' · ' + esc(d.fleet_owners.business_name || 'Fleet') : ''}</small></div></div></td>
         <td class="small">${v ? `<b class="mono">${esc((v.registration_number || '').toUpperCase())}</b><div class="muted">${esc(S.vtypes[v.vehicle_type_id] || '')}</div>` : '<span class="dim">No vehicle</span>'}</td>
         <td>${!d.is_active ? chip('no', 'Blocked') : !d.is_verified ? chip('pending', 'Not verified') : d.is_online ? chip('ok', 'Online') : chip('grey', 'Offline')}${pend ? ` <span class="chip pending">${pend} docs</span>` : ''}</td>
-        <td class="right">${num(d.total_rides)}</td><td class="right">⭐ ${num(d.rating).toFixed(1)}</td>
+        <td class="right">${num(d.total_rides)}</td><td class="right"><span class="star">★</span> ${num(d.rating).toFixed(1)}</td>
         <td class="right strong" style="color:${b < 0 ? 'var(--red2)' : b > 0 ? '#86EFAC' : 'inherit'}">${b < 0 ? '−' : ''}${rupees(Math.abs(b))}</td>
         <td class="small muted nowrap">${fmtDate(d.created_at)}</td></tr>`;
-    }).join('')}</tbody></table>` : `<div class="empty"><div class="e">🚚</div>No drivers here</div>`}</div>`;
+    }).join('')}</tbody></table>` : empty('drivers', 'No drivers here')}</div>`;
   $('#psub').textContent = `${counts.online} online · ${counts.verify} to verify`;
   $$('.tab', el).forEach((b) => (b.onclick = () => { S.drvTab = b.dataset.t; PAGES.drivers(el); }));
   const dq = $('#dq');
@@ -823,11 +896,17 @@ PAGES.customers = async (el) => {
   const term = (S.custQ || '').toLowerCase();
   const shown = term ? rows.filter((c) => [name(c), c.phone, c.email].join(' ').toLowerCase().includes(term)) : rows;
   el.innerHTML = `
-  <div class="toolbar"><div class="grow"></div><input class="input search" id="cq" placeholder="🔎  Name, phone, email" value="${esc(S.custQ || '')}"></div>
+  ${stats([
+    ['customers', 'blue', 'Customers', rows.length, 'all sign-ups'],
+    ['activity', 'green', 'New this week', rows.filter((c) => new Date(c.created_at) > weekAgo()).length, 'joined in the last 7 days'],
+    ['orders', 'violet', 'Have booked', rows.filter((c) => num(c.total_rides) > 0).length, rows.length ? Math.round((rows.filter((c) => num(c.total_rides) > 0).length / rows.length) * 100) + '% of customers' : ''],
+    ['xc', 'grey', 'Blocked', rows.filter((c) => !c.is_active).length, ''],
+  ])}
+  <div class="toolbar"><div class="grow"></div>${searchBox('cq', 'Name, phone, email', S.custQ)}</div>
   <div class="tbl-wrap">${shown.length ? `<table><thead><tr><th>Customer</th><th>Email</th><th class="right">Bookings</th><th>Status</th><th>Joined</th></tr></thead><tbody>
     ${shown.map((c) => `<tr class="row" data-c="${c.id}"><td><div class="who"><span class="avatar">${initial(c)}</span><div><b>${esc(name(c))}</b><small>${esc(c.phone || '')}</small></div></div></td>
       <td class="small muted">${esc(c.email || '')}</td><td class="right">${num(c.total_rides)}</td><td>${c.is_active ? chip('ok', 'Active') : chip('no', 'Blocked')}</td><td class="small muted nowrap">${fmtDate(c.created_at)}</td></tr>`).join('')}
-  </tbody></table>` : '<div class="empty"><div class="e">👤</div>No customers</div>'}</div>`;
+  </tbody></table>` : empty('customers', 'No customers')}</div>`;
   $('#psub').textContent = `${rows.length} customers`;
   const cq = $('#cq');
   cq.oninput = debounce(() => { S.custQ = cq.value; PAGES.customers(el).then(() => { const n = $('#cq'); n.focus(); n.setSelectionRange(n.value.length, n.value.length); }); }, 300);
@@ -873,12 +952,17 @@ PAGES.fleets = async (el) => {
   ]);
   const cnt = {};
   for (const d of drivers) cnt[d.fleet_owner_id] = (cnt[d.fleet_owner_id] || 0) + 1;
-  el.innerHTML = `<div class="tbl-wrap">${rows.length ? `<table><thead><tr><th>Owner</th><th>Business</th><th>GST</th><th class="right">Drivers</th><th>Status</th><th></th></tr></thead><tbody>
+  el.innerHTML = `${stats([
+    ['fleets', 'blue', 'Fleet owners', rows.length, ''],
+    ['shield', 'green', 'Verified', rows.filter((f) => f.is_active && f.is_verified).length, ''],
+    ['file', rows.some((f) => f.is_active && !f.is_verified) ? 'red' : 'grey', 'To verify', rows.filter((f) => f.is_active && !f.is_verified).length, 'check GST and business'],
+    ['drivers', 'violet', 'Fleet drivers', drivers.length, 'drivers under a fleet'],
+  ])}<div class="tbl-wrap">${rows.length ? `<table><thead><tr><th>Owner</th><th>Business</th><th>GST</th><th class="right">Drivers</th><th>Status</th><th></th></tr></thead><tbody>
     ${rows.map((f) => `<tr><td><div class="who"><span class="avatar">${initial(f)}</span><div><b>${esc(name(f))}</b><small>${esc(f.phone || '')}</small></div></div></td>
       <td>${esc(f.business_name || '—')}<div class="small muted">${esc(f.city || '')}</div></td><td class="mono small">${esc(f.gst_number || '—')}</td><td class="right">${cnt[f.id] || 0}</td>
       <td>${!f.is_active ? chip('no', 'Inactive') : f.is_verified ? chip('ok', 'Verified') : chip('pending', 'To verify')}</td>
       <td class="right">${f.is_active ? (f.is_verified ? `<button class="btn sm" data-f="${f.id}" data-v="0">Unverify</button>` : `<button class="btn sm good" data-f="${f.id}" data-v="1">Verify</button>`) : ''}</td></tr>`).join('')}
-  </tbody></table>` : '<div class="empty"><div class="e">🏢</div>No fleet owners yet</div>'}</div>`;
+  </tbody></table>` : empty('fleets', 'No fleet owners yet')}</div>`;
   $('#psub').textContent = `${rows.length} fleet owners`;
   $$('[data-f]', el).forEach((b) => (b.onclick = async () => {
     try { await q(sb.from('fleet_owners').update({ is_verified: b.dataset.v === '1', updated_at: new Date().toISOString() }).eq('id', b.dataset.f)); toast('Updated', 'ok'); PAGES.fleets(el); } catch (e) { fail(e); }
@@ -895,20 +979,21 @@ PAGES.payouts = async (el) => {
   const owe = Object.values(bal).filter((v) => v < 0).reduce((t, v) => t - v, 0);
   const pendingAmt = reqs.filter((r) => r.status === 'pending').reduce((t, r) => t + num(r.amount), 0);
   el.innerHTML = `
-  <div class="grid three">
-    <div class="card kpi"><span class="ico">⏳</span><div class="lbl">Payouts to send</div><div class="val">${rupees(pendingAmt)}</div><div class="hint">${reqs.filter((r) => r.status === 'pending').length} requests</div></div>
-    <div class="card kpi accent"><span class="ico">🧾</span><div class="lbl">Drivers owe JURTO</div><div class="val">${rupees(owe)}</div><div class="hint">cash commission not yet paid</div></div>
-    <div class="card kpi"><span class="ico">✅</span><div class="lbl">Dues paid online</div><div class="val">${rupees(dues.filter((d) => d.status === 'paid').reduce((t, d) => t + num(d.amount), 0))}</div><div class="hint">last ${dues.length} payments</div></div>
-  </div>
-  <div class="card" style="margin-top:14px"><h3>Withdrawal requests</h3>${reqs.length ? `<div class="tbl-wrap" style="border:0"><table><thead><tr><th>Driver</th><th class="right">Amount</th><th>Send to</th><th>Requested</th><th>Status</th><th></th></tr></thead><tbody>
+  ${stats([
+    ['payouts', pendingAmt ? 'red' : 'grey', 'Payouts to send', rupees(pendingAmt), `${reqs.filter((r) => r.status === 'pending').length} requests waiting`],
+    ['rupee', owe ? 'amber' : 'grey', 'Drivers owe JURTO', rupees(owe), 'cash commission not yet paid'],
+    ['check', 'green', 'Dues paid online', rupees(dues.filter((d) => d.status === 'completed' || d.status === 'paid').reduce((t, d) => t + num(d.amount), 0)), `last ${dues.length} payments`],
+    ['bank', 'blue', 'Paid out', rupees(reqs.filter((r) => r.status === 'paid').reduce((t, r) => t + num(r.amount), 0)), `${reqs.filter((r) => r.status === 'paid').length} withdrawals`],
+  ])}
+  <div class="card" style="margin-top:16px"><div class="ch"><div><h3>Withdrawal requests</h3><div class="cs">Send the money by UPI / bank first, then mark it paid</div></div></div>${reqs.length ? `<div class="tbl-wrap" style="border:0"><table><thead><tr><th>Driver</th><th class="right">Amount</th><th>Send to</th><th>Requested</th><th>Status</th><th></th></tr></thead><tbody>
     ${reqs.map((r) => { const a = r.account_snapshot || {}; return `<tr><td><div class="who" style="cursor:pointer" data-d="${r.drivers?.id}"><span class="avatar">${initial(r.drivers)}</span><div><b>${esc(name(r.drivers))}</b><small>${esc(r.drivers?.phone || '')}</small></div></div></td>
       <td class="right strong">${rupees2(r.amount)}</td>
       <td class="small">${a.upi_id ? 'UPI <b class="mono">' + esc(a.upi_id) + '</b>' : ''}${a.account_number ? `<div>${esc(a.account_holder || '')} · <span class="mono">${esc(a.account_number)}</span> · ${esc(a.ifsc || '')}</div>` : ''}${!a.upi_id && !a.account_number ? '<span class="dim">—</span>' : ''}</td>
       <td class="small muted nowrap">${fmtDate(r.created_at)}</td>
       <td>${r.status === 'pending' ? chip('pending', 'Pending') : r.status === 'paid' ? chip('ok', 'Paid') : chip('no', 'Rejected')}${r.reference ? `<div class="small muted mono">${esc(r.reference)}</div>` : ''}</td>
       <td class="right nowrap">${r.status === 'pending' ? `<button class="btn sm good" data-p="${r.id}" data-s="paid">Mark paid</button> <button class="btn sm bad" data-p="${r.id}" data-s="rejected">Reject</button>` : ''}</td></tr>`; }).join('')}
-  </tbody></table></div>` : '<div class="empty"><div class="e">💸</div>No withdrawal requests</div>'}</div>
-  <div class="card" style="margin-top:14px"><h3>Driver dues payments (online)</h3>${dues.length ? dues.map((d) => `<div class="small" style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)"><b>${esc(name(d.drivers))}</b><span class="muted">${fmtDate(d.created_at)}</span><span style="flex:1"></span>${chip(d.status === 'paid' ? 'ok' : 'grey', d.status)}<b>${rupees2(d.amount)}</b></div>`).join('') : '<div class="empty">No dues payments yet</div>'}</div>`;
+  </tbody></table></div>` : empty('payouts', 'No withdrawal requests')}</div>
+  <div class="card" style="margin-top:16px"><div class="ch"><div><h3>Driver dues payments</h3><div class="cs">Paid online from the driver app</div></div></div>${dues.length ? dues.map((d) => `<div class="small" style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)"><b>${esc(name(d.drivers))}</b><span class="muted">${fmtDate(d.created_at)}</span><span style="flex:1"></span>${chip(d.status === 'completed' || d.status === 'paid' ? 'ok' : d.status === 'failed' ? 'no' : 'grey', d.status)}<b>${rupees2(d.amount)}</b></div>`).join('') : empty('rupee', 'No dues payments yet')}</div>`;
   $$('[data-d]', el).forEach((x) => x.dataset.d && (x.onclick = () => openDriver(x.dataset.d)));
   $$('[data-p]', el).forEach((b) => (b.onclick = async () => {
     const paid = b.dataset.s === 'paid';
@@ -928,7 +1013,13 @@ PAGES.pricing = async (el) => {
   const defPct = num(commission?.value?.percent ?? 15);
   const cols = [['base_rate', 'Base ₹'], ['included_km', 'Incl. km'], ['per_km_rate', '₹ / km'], ['per_min_rate', '₹ / min'], ['free_minutes', 'Free min'], ['capacity_kg', 'Max kg'], ['commission_percent', 'Commission %']];
   el.innerHTML = `
-  <div class="card"><h3>Vehicle fares<span class="grow"></span><span class="small muted" style="text-transform:none;letter-spacing:0">Commission blank = default ${defPct}%</span></h3>
+  ${stats([
+    ['drivers', 'blue', 'Vehicle types', vt.length, `${vt.filter((v) => v.is_active).length} active in the app`],
+    ['rupee', 'green', 'Lowest base fare', vt.length ? rupees(Math.min(...vt.map((v) => num(v.base_rate)))) : '—', ''],
+    ['rupee', 'violet', 'Highest base fare', vt.length ? rupees(Math.max(...vt.map((v) => num(v.base_rate)))) : '—', ''],
+    ['bank', 'amber', 'Default commission', defPct + '%', 'change it in Settings'],
+  ])}
+  <div class="card" style="margin-top:16px"><div class="ch"><div><h3>Vehicle fares</h3><div class="cs">Edit a row and press Save · commission blank = default ${defPct}%</div></div></div>
     <div class="tbl-wrap" style="border:0"><table><thead><tr><th>Vehicle</th>${cols.map((c) => `<th>${c[1]}</th>`).join('')}<th>Active</th><th></th></tr></thead><tbody>
     ${vt.map((v) => `<tr data-v="${v.id}"><td><b>${esc(v.type_name)}</b><div class="small muted">${esc(v.body_size || '')}</div></td>
       ${cols.map(([k]) => `<td><input class="cell-in" type="number" step="0.5" name="${k}" value="${v[k] ?? ''}"></td>`).join('')}
@@ -948,7 +1039,14 @@ PAGES.pricing = async (el) => {
 /* ---------- promos ---------- */
 PAGES.promos = async (el) => {
   const rows = await q(sb.from('promo_codes').select('*').order('created_at', { ascending: false }));
+  const live = rows.filter((p) => p.is_active && (!p.valid_to || new Date(p.valid_to) > new Date()));
   el.innerHTML = `
+  ${stats([
+    ['promos', 'blue', 'Promo codes', rows.length, ''],
+    ['check', 'green', 'Running now', live.length, 'active and not expired'],
+    ['customers', 'violet', 'First booking only', rows.filter((p) => p.first_order_only).length, ''],
+    ['xc', 'grey', 'Off or expired', rows.length - live.length, ''],
+  ])}
   <div class="toolbar"><div class="grow"></div><button class="btn primary" id="pnew">＋ New promo code</button></div>
   <div class="tbl-wrap">${rows.length ? `<table><thead><tr><th>Code</th><th>Offer</th><th>Rules</th><th>Valid till</th><th>Active</th></tr></thead><tbody>
     ${rows.map((p) => `<tr><td><b class="mono" style="font-size:14px">${esc(p.code)}</b><div class="small muted">${esc(p.description || '')}</div></td>
@@ -956,7 +1054,7 @@ PAGES.promos = async (el) => {
       <td class="small muted">${p.min_fare ? 'Min fare ' + rupees(p.min_fare) + '<br>' : ''}${p.first_order_only ? 'First booking only<br>' : ''}${p.per_customer_limit ? p.per_customer_limit + ' per customer' : ''}${p.max_uses ? ' · ' + p.max_uses + ' total' : ''}</td>
       <td class="small">${p.valid_to ? fmtDate(p.valid_to) : '<span class="dim">No end</span>'}</td>
       <td><label class="switch"><input type="checkbox" data-code="${esc(p.code)}" ${p.is_active ? 'checked' : ''}></label></td></tr>`).join('')}
-  </tbody></table>` : '<div class="empty"><div class="e">🎁</div>No promo codes</div>'}</div>`;
+  </tbody></table>` : empty('promos', 'No promo codes')}</div>`;
   $$('[data-code]', el).forEach((c) => (c.onchange = async () => {
     try { await q(sb.from('promo_codes').update({ is_active: c.checked }).eq('code', c.dataset.code)); toast(c.checked ? 'Promo turned on' : 'Promo turned off', 'ok'); } catch (e) { fail(e); c.checked = !c.checked; }
   }));
@@ -989,13 +1087,18 @@ PAGES.promos = async (el) => {
 PAGES.support = async (el) => {
   const rows = await q(sb.from('support_tickets').select('*, customers(id,first_name,last_name,phone)').order('created_at', { ascending: false }).limit(300));
   const open = rows.filter((t) => !['resolved', 'closed'].includes(t.status || 'open'));
-  el.innerHTML = `<div class="tbl-wrap">${rows.length ? `<table><thead><tr><th>Customer</th><th>Issue</th><th>Order</th><th>Raised</th><th>Status</th></tr></thead><tbody>
+  el.innerHTML = `${stats([
+    ['support', open.length ? 'red' : 'grey', 'Open', rows.filter((t) => (t.status || 'open') === 'open').length, 'waiting for a reply'],
+    ['activity', 'amber', 'In progress', rows.filter((t) => t.status === 'in_progress').length, ''],
+    ['check', 'green', 'Resolved', rows.filter((t) => ['resolved', 'closed'].includes(t.status)).length, ''],
+    ['customers', 'blue', 'This week', rows.filter((t) => new Date(t.created_at) > weekAgo()).length, 'new tickets'],
+  ])}<div class="tbl-wrap">${rows.length ? `<table><thead><tr><th>Customer</th><th>Issue</th><th>Order</th><th>Raised</th><th>Status</th></tr></thead><tbody>
     ${rows.map((t) => `<tr><td><div class="who" style="cursor:pointer" data-c="${t.customers?.id || ''}"><span class="avatar">${initial(t.customers)}</span><div><b>${esc(name(t.customers))}</b><small><a href="tel:${esc(t.customers?.phone)}">${esc(t.customers?.phone || '')}</a></small></div></div></td>
       <td><b>${esc(t.subject || '')}</b><div class="small muted" style="max-width:420px;white-space:pre-wrap">${esc(t.description || '')}</div></td>
       <td>${t.order_id ? `<a href="#" class="mono" data-o="${t.order_id}">#${shortId(t.order_id)}</a>` : '—'}</td>
       <td class="small muted nowrap">${fmtDate(t.created_at)}</td>
       <td><select class="cell-in" data-t="${t.id}">${[['open', 'Open'], ['in_progress', 'In progress'], ['resolved', 'Resolved']].map(([k, l]) => `<option value="${k}" ${(t.status || 'open') === k ? 'selected' : ''}>${l}</option>`).join('')}</select></td></tr>`).join('')}
-  </tbody></table>` : '<div class="empty"><div class="e">🎧</div>No support tickets. Customers raise them from Account → Support.</div>'}</div>`;
+  </tbody></table>` : empty('support', 'No support tickets. Customers raise them from Account → Support.')}</div>`;
   $('#psub').textContent = `${open.length} open`;
   $$('[data-t]', el).forEach((s) => (s.onchange = async () => { try { await q(sb.from('support_tickets').update({ status: s.value }).eq('id', s.dataset.t)); toast('Ticket updated', 'ok'); } catch (e) { fail(e); } }));
   $$('[data-o]', el).forEach((a) => (a.onclick = (e) => { e.preventDefault(); openOrder(a.dataset.o); }));
@@ -1004,14 +1107,14 @@ PAGES.support = async (el) => {
 
 /* ---------- settings ---------- */
 const SETTING_FORMS = [
-  ['commission', '🏦 Commission', [['percent', 'Default commission %', 'JURTO keeps this % of every completed fare (unless the vehicle has its own %).']]],
-  ['order_timeout', '⏱️ Order timeout', [['minutes', 'Minutes to find a driver', 'After this, a pending order is cancelled as "no driver found".']]],
-  ['near_alert', '📍 Driver almost-there alert', [['meters', 'Distance in metres', 'Customer gets “Driver is almost there” at this distance. 0 turns it off.']]],
-  ['coins', '🪙 JURTO Coins', [['earn_per', 'Earn 1 coin per ₹', 'Lower = more coins.'], ['value', '₹ value of 1 coin', ''], ['max_pct', 'Max % of a fare paid by coins', ''], ['min_redeem', 'Minimum coins to use', '']]],
-  ['wallet', '👛 Driver wallet', [['dues_limit', 'Dues limit ₹', 'Drivers who owe more than this cannot go online.'], ['min_withdrawal', 'Minimum withdrawal ₹', '']]],
-  ['cancel_fee', '🚫 Cancellation fee', [['amount', 'Fee ₹', 'Charged when a customer cancels after the driver has come.']]],
-  ['incentive', '🏆 Driver daily bonus', [['trips', 'Trips in a day', ''], ['bonus', 'Bonus ₹', 'Paid once a driver finishes this many trips in a day.']]],
-  ['referral', '🤝 Referral', [['bonus', 'Bonus ₹ for both', 'Added to the wallet after the friend’s first booking.']]],
+  ['commission', `${ico('bank', 16)} Commission`, [['percent', 'Default commission %', 'JURTO keeps this % of every completed fare (unless the vehicle has its own %).']]],
+  ['order_timeout', `${ico('activity', 16)} Order timeout`, [['minutes', 'Minutes to find a driver', 'After this, a pending order is cancelled as "no driver found".']]],
+  ['near_alert', `${ico('live', 16)} Driver almost-there alert`, [['meters', 'Distance in metres', 'Customer gets “Driver is almost there” at this distance. 0 turns it off.']]],
+  ['coins', `${ico('rupee', 16)} JURTO Coins`, [['earn_per', 'Earn 1 coin per ₹', 'Lower = more coins.'], ['value', '₹ value of 1 coin', ''], ['max_pct', 'Max % of a fare paid by coins', ''], ['min_redeem', 'Minimum coins to use', '']]],
+  ['wallet', `${ico('payouts', 16)} Driver wallet`, [['dues_limit', 'Dues limit ₹', 'Drivers who owe more than this cannot go online.'], ['min_withdrawal', 'Minimum withdrawal ₹', '']]],
+  ['cancel_fee', `${ico('xc', 16)} Cancellation fee`, [['amount', 'Fee ₹', 'Charged when a customer cancels after the driver has come.']]],
+  ['incentive', `${ico('check', 16)} Driver daily bonus`, [['trips', 'Trips in a day', ''], ['bonus', 'Bonus ₹', 'Paid once a driver finishes this many trips in a day.']]],
+  ['referral', `${ico('customers', 16)} Referral`, [['bonus', 'Bonus ₹ for both', 'Added to the wallet after the friend’s first booking.']]],
 ];
 PAGES.settings = async (el) => {
   const rows = await q(sb.from('app_settings').select('key,value').order('key'));
