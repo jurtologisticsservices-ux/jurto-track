@@ -219,12 +219,12 @@ const ICONS = {
   moon: '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',
 };
 // Light (white) or dark workspace, remembered on this device
-const theme = () => document.documentElement.dataset.theme || 'dark';
+const theme = () => document.documentElement.dataset.theme || 'light';
 function setTheme(t) {
   document.documentElement.dataset.theme = t;
   try { localStorage.setItem('jurto_theme', t); } catch (_) {}
 }
-try { setTheme(localStorage.getItem('jurto_theme') || 'dark'); } catch (_) {}
+try { setTheme(localStorage.getItem('jurto_theme') || 'light'); } catch (_) {}
 const ico = (n, size = 18) => `<svg class="i" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n] || ''}</svg>`;
 
 /* ---------------- shell & routing ---------------- */
