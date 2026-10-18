@@ -317,13 +317,49 @@ function stopLive() {
 }
 
 /* ---------------- map ---------------- */
-function makeMap(el, zoom = 11) {
-  const m = L.map(el, { zoomControl: true, attributionControl: true }).setView(CHENNAI, zoom);
+// Google Maps (website key, locked to this site) drawn inside Leaflet through GoogleMutant, so the pins,
+// popups and route lines stay the same. If Google refuses the key, the maps fall back to OpenStreetMap.
+const GMAP_DARK = [
+  { elementType: 'geometry', stylers: [{ color: '#0F1A2E' }] },
+  { elementType: 'labels.text.fill', stylers: [{ color: '#8A97B2' }] },
+  { elementType: 'labels.text.stroke', stylers: [{ color: '#0B1220' }] },
+  { featureType: 'administrative', elementType: 'geometry', stylers: [{ color: '#2A3958' }] },
+  { featureType: 'landscape.man_made', elementType: 'geometry', stylers: [{ color: '#121D33' }] },
+  { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#1F2B45' }] },
+  { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#6B7896' }] },
+  { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#2D3F66' }] },
+  { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#070D1A' }] },
+];
+window.jurtoNoGoogle = () => {
+  if (S.noGoogle) return;
+  S.noGoogle = true;
+  if (S.user && $('#page')) { toast('Google Maps is unavailable right now, showing OpenStreetMap'); route(); }
+};
+function osmLayer() {
   // OpenStreetMap tiles, darkened to the console's navy with a CSS filter (.dark-tiles)
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  return L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19, className: 'dark-tiles',
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-  }).addTo(m);
+  });
+}
+function makeMap(el, zoom = 11) {
+  const m = L.map(el, { zoomControl: true, attributionControl: true }).setView(CHENNAI, zoom);
+  if (S.noGoogle || window.gmFailed || !L.gridLayer.googleMutant) {
+    osmLayer().addTo(m);
+  } else {
+    const layers = {
+      Dark: L.gridLayer.googleMutant({ type: 'roadmap', styles: GMAP_DARK, maxZoom: 21 }),
+      Map: L.gridLayer.googleMutant({ type: 'roadmap', maxZoom: 21 }),
+      Satellite: L.gridLayer.googleMutant({ type: 'hybrid', maxZoom: 21 }),
+    };
+    let pick = 'Dark';
+    try { pick = localStorage.getItem('jurto_map') || 'Dark'; } catch (_) {}
+    (layers[pick] || layers.Dark).addTo(m);
+    L.control.layers(layers, null, { position: 'topright' }).addTo(m);
+    m.on('baselayerchange', (e) => { try { localStorage.setItem('jurto_map', e.name); } catch (_) {} });
+  }
   S.maps.push(m);
   return m;
 }

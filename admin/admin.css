@@ -341,3 +341,7 @@ tr:last-child td { border-bottom: 0; }
   .top .clock, .top .sub { display: none; }
 }
 td .route { min-width: 200px; }
+.leaflet-control-layers { background: var(--card2) !important; color: var(--text); border: 1px solid var(--line2) !important; border-radius: 10px !important; box-shadow: var(--shadow) !important; }
+.leaflet-control-layers-expanded { padding: 8px 12px 8px 8px; }
+.leaflet-control-layers label { font-weight: 600; font-size: 12.5px; }
+.leaflet-control-layers-toggle { filter: invert(1) brightness(1.4); }
