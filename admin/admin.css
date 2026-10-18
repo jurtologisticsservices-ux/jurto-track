@@ -411,3 +411,12 @@ th { background: var(--panel); }
 :root[data-theme="light"] ::-webkit-scrollbar-thumb { border-color: var(--bg); }
 .theme-btn .i { display: block; }
 :root[data-theme="light"] .login-card { background: #FFFFFF; border-color: var(--line); box-shadow: 0 20px 50px rgba(15, 23, 42, .10); }
+/* assign-driver picker */
+.cands { display: grid; gap: 10px; }
+.cand { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); }
+.cand.off { opacity: .6; }
+.cand .cm { flex: 1; min-width: 0; }
+.cand .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.cand .ck { display: grid; justify-items: end; gap: 6px; text-align: right; }
+.cand .ck b { font-size: 15px; font-variant-numeric: tabular-nums; }
+.cand .ck span { font-size: 11px; color: var(--dim); }

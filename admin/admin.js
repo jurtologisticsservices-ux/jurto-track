@@ -648,9 +648,11 @@ PAGES.live = async (el, quiet) => {
         <div class="hd"><b class="mono">#${shortId(o.id)}</b>${chip(o.status)}<span class="grow"></span><b>${rupees(o.estimated_fare)}</b></div>
         <div class="route small"><div class="p">${esc(o.pickup_address)}</div><div class="d">${esc(o.dropoff_address)}</div></div>
         <div class="small muted" style="margin-top:8px">${esc(S.vtypes[o.vehicle_type_id] || '')} · ${esc(name(o.customers))}${o.driver_name ? ' · 🚚 ' + esc(o.driver_name) : ''}${wait != null ? ` · <b style="color:${wait >= 3 ? 'var(--red2)' : 'var(--amber)'}">waiting ${wait} min</b>` : ''}</div>
+        ${o.status === 'pending' ? `<button class="btn sm primary" style="margin-top:10px" data-assign="${o.id}">${ico('drivers', 14)} Assign driver</button>` : ''}
       </div>`;
     }).join('') : `<div class="empty"><div class="e">😌</div>No live orders right now</div>`}`;
   $$('.fo', el).forEach((f) => (f.onclick = () => openOrder(f.dataset.o)));
+  $$('[data-assign]', el).forEach((b) => (b.onclick = (e) => { e.stopPropagation(); assignDriver(b.dataset.assign); }));
 };
 
 /* ---------- orders ---------- */
@@ -714,7 +716,7 @@ async function openOrder(id) {
     const tl = [
       ['Booked', o.created_at, true],
       o.scheduled_at && ['Scheduled for', o.scheduled_at, true],
-      ['Driver assigned', o.accepted_at],
+      [o.assigned_by ? 'Driver assigned by JURTO' : 'Driver assigned', o.accepted_at],
       ['Arrived at pickup', o.arrived_at],
       ['Trip started', o.started_at],
       ['Reached drop', o.drop_arrived_at],
@@ -733,7 +735,7 @@ async function openOrder(id) {
         <div class="sec"><h4>Customer</h4><div class="who" style="cursor:pointer" id="ocust"><span class="avatar">${initial(o.customers)}</span><div><b>${esc(name(o.customers))}</b><small><a href="tel:${esc(o.customers?.phone)}">${esc(o.customers?.phone || '')}</a></small></div></div>
           ${o.receiver_name || o.receiver_phone ? `<div class="small muted" style="margin-top:10px">Receiver: ${esc(o.receiver_name || '')} <a href="tel:${esc(o.receiver_phone)}">${esc(o.receiver_phone || '')}</a></div>` : ''}</div>
         <div class="sec"><h4>Driver</h4>${o.drivers ? `<div class="who" style="cursor:pointer" id="odrv"><span class="avatar">${initial(o.drivers)}</span><div><b>${esc(name(o.drivers))}</b><small><a href="tel:${esc(o.drivers.phone)}">${esc(o.drivers.phone || '')}</a> · ⭐ ${num(o.drivers.rating).toFixed(1)}</small></div></div>
-          <div class="small muted" style="margin-top:10px">${esc(o.vehicle_model || '')} ${esc((o.vehicle_number || '').toUpperCase())}</div>` : '<span class="muted">Not assigned</span>'}</div>
+          <div class="small muted" style="margin-top:10px">${esc(o.vehicle_model || '')} ${esc((o.vehicle_number || '').toUpperCase())}</div>` : `<span class="muted">Not assigned</span>${o.status === 'pending' ? `<div style="margin-top:10px"><button class="btn sm primary" data-assign="${o.id}">${ico('drivers', 15)} Assign driver</button></div>` : ''}`}</div>
       </div>
       <div class="sec"><h4>Fare</h4><div class="fare">
         <div><span class="muted">${esc(S.vtypes[o.vehicle_type_id] || 'Vehicle')} · ${num(o.estimated_distance_km).toFixed(1)} km</span><span>${rupees2(o.estimated_fare)}</span></div>
@@ -746,6 +748,7 @@ async function openOrder(id) {
       </div></div>
       ${ratings.length ? `<div class="sec"><h4>Ratings</h4>${ratings.map((r) => `<div class="small"><b>${'⭐'.repeat(r.rating)}</b> by ${esc(r.rater_role)} ${r.comment ? '· “' + esc(r.comment) + '”' : ''}</div>`).join('')}</div>` : ''}
       <div class="sec"><h4>Actions</h4><div class="actions">
+        ${o.status === 'pending' ? `<button class="btn primary" data-assign="${o.id}">${ico('drivers', 15)} Assign driver</button>` : ''}
         ${['pending', 'scheduled', 'accepted', 'in_transit'].includes(o.status) ? '<button class="btn bad" id="ocancel">Cancel order</button>' : ''}
         ${o.share_token ? `<a class="btn" target="_blank" rel="noopener" href="${TRACK_BASE}?t=${esc(o.share_token)}">Open tracking link ↗</a>` : ''}
         <button class="btn ghost" id="ocopy">Copy order ID</button>
@@ -759,6 +762,7 @@ async function openOrder(id) {
     setTimeout(() => m.invalidateSize(), 300);
     if (o.customers) $('#ocust').onclick = () => openCustomer(o.customers.id);
     if (o.drivers) $('#odrv').onclick = () => openDriver(o.drivers.id);
+    $$('[data-assign]', body).forEach((b) => (b.onclick = () => assignDriver(o.id)));
     $('#ocopy').onclick = () => navigator.clipboard?.writeText(o.id).then(() => toast('Copied', 'ok'));
     const c = $('#ocancel');
     if (c) c.onclick = async () => {
@@ -831,6 +835,55 @@ PAGES.drivers = async (el) => {
   dq.oninput = debounce(() => { S.drvQ = dq.value; PAGES.drivers(el).then(() => { const n = $('#dq'); n.focus(); n.setSelectionRange(n.value.length, n.value.length); }); }, 300);
   $$('tr[data-d]', el).forEach((r) => (r.onclick = () => openDriver(r.dataset.d)));
 };
+
+/* ---------- assign a driver by hand ---------- */
+const ASSIGN_ERR = {
+  driver_on_a_trip: 'This driver is already on a trip.',
+  vehicle_type_mismatch: 'This driver has no active vehicle of the booked type.',
+  order_not_available: 'This order is no longer waiting for a driver.',
+  driver_not_eligible: 'This driver is blocked or not verified.',
+};
+async function assignDriver(orderId) {
+  const body = openDrawer('Assign driver · #' + shortId(orderId));
+  try {
+    const [o, list] = await Promise.all([
+      q(sb.from('orders').select('id,status,pickup_address,dropoff_address,estimated_fare,vehicle_type_id,created_at').eq('id', orderId).single()),
+      q(sb.rpc('admin_driver_candidates', { p_order: orderId })),
+    ]);
+    $('#dhead').innerHTML = chip(o.status);
+    const free = list.filter((d) => d.online && !d.busy).length;
+    body.innerHTML = `
+      <div class="sec"><div class="route small"><div class="p">${esc(o.pickup_address)}</div><div class="d">${esc(o.dropoff_address)}</div></div>
+        <div class="small muted" style="margin-top:8px">${esc(S.vtypes[o.vehicle_type_id] || '')} · ${rupees(o.estimated_fare)} · booked ${ago(o.created_at)}</div></div>
+      <div class="small muted">${list.length ? `${list.length} drivers with a ${esc(S.vtypes[o.vehicle_type_id] || 'matching')} vehicle · <b>${free} free and online</b>. Nearest first. Call the driver before assigning if they are offline.` : ''}</div>
+      ${list.length ? `<div class="cands">${list.map((d) => `<div class="cand ${d.busy ? 'off' : ''}">
+        <span class="avatar">${esc((d.name || 'D')[0].toUpperCase())}</span>
+        <div class="cm"><b>${esc(d.name || 'Driver')}</b>
+          <div class="small muted"><span class="mono">${esc((d.vehicle || '').toUpperCase())}</span> · <a href="tel:${esc(d.phone)}">${esc(d.phone || '')}</a> · <span class="star">★</span> ${num(d.rating).toFixed(1)}</div>
+          <div class="tags">${d.busy ? chip('pending', 'On a trip') : d.online ? chip('ok', 'Online') : chip('grey', 'Offline' + (d.last_seen ? ' · seen ' + ago(d.last_seen) : ''))}
+            ${d.declined ? chip('no', 'Passed on this order') : ''}${d.over_limit ? chip('no', 'Dues ' + rupees(d.dues)) : ''}</div></div>
+        <div class="ck">${d.km != null ? `<b>${num(d.km).toFixed(1)} km</b><span>from pickup</span>` : '<span>no location</span>'}
+          <button class="btn sm ${d.busy ? '' : 'primary'}" data-pick="${d.id}" ${d.busy ? 'disabled' : ''}>Assign</button></div>
+      </div>`).join('')}</div>` : empty('drivers', 'No verified driver has an active vehicle of this type yet.')}`;
+    $$('[data-pick]', body).forEach((b) => (b.onclick = async () => {
+      const d = list.find((x) => x.id === b.dataset.pick);
+      const v = await ask({ title: 'Assign this trip?', ok: 'Assign',
+        text: `<b>${esc(d.name || 'Driver')}</b> gets the trip now and a notification on the phone. The customer is told the driver is on the way.${d.online ? '' : '<br><br>⚠️ This driver is offline. Call them first so they open the app.'}${d.over_limit ? '<br><br>⚠️ This driver owes more than the dues limit.' : ''}` });
+      if (!v) return;
+      b.disabled = true;
+      try {
+        await q(sb.rpc('admin_assign_driver', { p_order: orderId, p_driver: d.id }));
+        toast(`Trip assigned to <b>${esc(d.name || 'driver')}</b>`, 'ok');
+        openOrder(orderId);
+        if (['dashboard', 'live', 'orders'].includes(S.route)) PAGES[S.route]($('#page'), true).catch(() => {});
+      } catch (e) {
+        b.disabled = false;
+        const k = Object.keys(ASSIGN_ERR).find((x) => String(e.message).includes(x));
+        fail(k ? ASSIGN_ERR[k] : e);
+      }
+    }));
+  } catch (e) { body.innerHTML = `<div class="empty">${esc(e.message)}</div>`; }
+}
 
 const DOC_LABEL = { driving_license: 'Driving licence', rc_book: 'RC book', id_proof: 'ID proof', insurance: 'Insurance', profile_photo: 'Photo', vehicle_photo: 'Vehicle photo' };
 async function openDriver(id) {
