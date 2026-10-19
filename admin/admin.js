@@ -1182,6 +1182,7 @@ const SETTING_FORMS = [
   ['wallet', `${ico('payouts', 16)} Driver wallet`, [['dues_limit', 'Dues limit ₹', 'Drivers who owe more than this cannot go online.'], ['min_withdrawal', 'Minimum withdrawal ₹', '']]],
   ['cancel_fee', `${ico('xc', 16)} Cancellation fee`, [['amount', 'Fee ₹', 'Charged when a customer cancels after the driver has come.']]],
   ['incentive', `${ico('check', 16)} Driver daily bonus`, [['trips', 'Trips in a day', ''], ['bonus', 'Bonus ₹', 'Paid once a driver finishes this many trips in a day.']]],
+  ['order_limits', `${ico('orders', 16)} Customer booking limits`, [['max_active', 'Bookings in progress at once', 'A customer cannot book more until one is finished or cancelled. 0 = no limit.'], ['per_day', 'Bookings per day', 'Counted from midnight. 0 = no limit.']]],
   ['referral', `${ico('customers', 16)} Referral`, [['bonus', 'Bonus ₹ for both', 'Added to the wallet after the friend’s first booking.']]],
 ];
 PAGES.settings = async (el) => {
