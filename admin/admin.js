@@ -4,7 +4,7 @@
 
 const SB_URL = 'https://nflgbrdrtsrdvqrjcwmh.supabase.co';
 const SB_KEY = 'sb_publishable_yq-Sc5bxBlcS73lDfZpmlg_RMtybD3m';
-const TRACK_BASE = 'https://jurtologisticsservices-ux.github.io/jurto-track/';
+const TRACK_BASE = new URL('../', location.href).href; // site root, whichever domain the console is opened on
 const CHENNAI = [13.0827, 80.2707];
 // Read the email-link result before the Supabase client tidies the address bar.
 const LINK = new URLSearchParams(location.hash.replace(/^#/, ''));
