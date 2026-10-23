@@ -8,33 +8,34 @@
   @page { size: A5; margin: 0; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Noto Sans Tamil', 'Inter', sans-serif; background: #fff; }
-  .page { width: 148mm; height: 210mm; background: #0B1220; color: #fff; padding: 9mm 9mm 7mm; display: flex; flex-direction: column; overflow: hidden; position: relative; }
-  .brand { font-family: 'Inter', sans-serif; font-weight: 900; font-size: 30pt; letter-spacing: 1px; color: #FFCE00; }
-  .brand small { display: block; font-size: 9pt; font-weight: 500; color: #BAC3D3; letter-spacing: 0; margin-top: 1mm; }
-  h1 { font-size: 19pt; line-height: 1.3; font-weight: 800; margin-top: 4mm; }
-  h1 span { color: #FFCE00; }
-  .sub { font-size: 10.5pt; color: #C9D1E0; margin-top: 2mm; line-height: 1.5; }
+  .page { width: 148mm; height: 210mm; background: linear-gradient(160deg,#F01010 0%,#C40000 55%,#A00000 100%); color: #fff; padding: 7mm 9mm 6mm; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+  .brand { display: flex; align-items: center; gap: 4mm; font-family: 'Inter', sans-serif; font-weight: 900; font-size: 30pt; letter-spacing: 1px; color: #fff; }
+  .brand img { width: 19mm; height: 19mm; border-radius: 4.5mm; box-shadow: 0 1mm 3mm rgba(0,0,0,.35); }
+  .brand small { display: block; font-size: 9pt; font-weight: 500; color: #FFE3D6; letter-spacing: 0; margin-top: 1mm; }
+  h1 { font-size: 19pt; line-height: 1.3; font-weight: 800; margin-top: 3mm; }
+  h1 span { color: #FFD23F; }
+  .sub { font-size: 10.5pt; color: #FFE3D6; margin-top: 2mm; line-height: 1.5; }
   .vehicles { display: flex; justify-content: space-between; margin-top: 4mm; background: #fff; border-radius: 4mm; padding: 3mm 4mm; }
   .v { text-align: center; color: #0B1220; font-size: 8pt; font-weight: 700; }
   .v img { height: 13mm; display: block; margin: 0 auto 1mm; }
   ul { list-style: none; margin-top: 4mm; font-size: 10pt; line-height: 1.4; }
   li { padding-left: 7mm; position: relative; margin-bottom: 2.4mm; }
-  li::before { content: "✓"; position: absolute; left: 0; color: #FFCE00; font-weight: 900; }
-  .offer { margin-top: 3mm; background: #FF6A00; border-radius: 4mm; padding: 3.5mm 4mm; text-align: center; }
+  li::before { content: "✓"; position: absolute; left: 0; color: #FFD23F; font-weight: 900; }
+  .offer { margin-top: 3mm; background: #FFD23F; color: #7A0000; border-radius: 4mm; padding: 3.5mm 4mm; text-align: center; }
   .offer b { font-size: 13pt; display: block; }
-  .offer .code { display: inline-block; margin-top: 1.5mm; background: #fff; color: #0B1220; font-family: 'Inter', sans-serif; font-weight: 900; font-size: 13pt; padding: 1mm 4mm; border-radius: 2mm; border: 0.6mm dashed #0B1220; letter-spacing: 1px; }
+  .offer .code { display: inline-block; margin-top: 1.5mm; background: #fff; color: #0B1220; font-family: 'Inter', sans-serif; font-weight: 900; font-size: 13pt; padding: 1mm 4mm; border-radius: 2mm; border: 0.6mm dashed #C40000; color: #C40000; letter-spacing: 1px; }
   .qrs { display: flex; gap: 5mm; margin-top: auto; }
   .qr { flex: 1; background: #fff; color: #0B1220; border-radius: 4mm; padding: 3mm; text-align: center; }
   .qr img { width: 27mm; height: 27mm; display: block; margin: 0 auto 1.5mm; }
-  .qr b { font-size: 10pt; display: block; }
+  .qr b { font-size: 9.5pt; display: block; }
   .qr span { font-size: 8pt; color: #44506a; }
-  .foot { text-align: center; font-family: 'Inter', sans-serif; font-size: 9pt; color: #BAC3D3; margin-top: 3mm; }
+  .foot { text-align: center; font-family: 'Inter', sans-serif; font-size: 9pt; color: #FFE3D6; margin-top: 2mm; }
   .foot b { color: #fff; }
 </style>
 </head>
 <body>
 <div class="page">
-  <div class="brand">JURTO<small>Goods delivery · Chennai</small></div>
+  <div class="brand"><img src="jurto-logo.jpg" alt="JURTO logo"><div>JURTO<small>Goods delivery · Chennai</small></div></div>
 
   <h1>பைக் முதல் லாரி வரை,<br><span>சென்னை முழுக்க டெலிவரி!</span></h1>
   <p class="sub">பார்சல், கடை சாமான், வீடு மாற்றம். எதுவானாலும் சில நிமிஷத்துல book பண்ணுங்க.</p>
