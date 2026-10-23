@@ -31,7 +31,7 @@
 
   .label { font-size: 7.5pt; font-weight: 700; letter-spacing: 0.5mm; color: #1C1C1C; margin: 3.5mm 0 1.8mm 1mm; text-transform: uppercase; }
 
-  .offer { position: relative; overflow: hidden; border-radius: 4mm; padding: 3.5mm 4mm; color: #fff; background: linear-gradient(90deg, #FF6A00, #F4511E); }
+  .offer { margin-bottom: 4mm; position: relative; overflow: hidden; border-radius: 4mm; padding: 3.5mm 4mm; color: #fff; background: linear-gradient(90deg, #FF6A00, #F4511E); }
   .offer::after { content: ""; position: absolute; right: -10mm; top: -12mm; width: 36mm; height: 36mm; border-radius: 50%; background: rgba(255,255,255,.14); }
   .chip { display: inline-block; background: #fff; color: #FF6A00; border-radius: 4mm; padding: 0.6mm 2.4mm; font-size: 7.5pt; font-weight: 900; }
   .offer h2 { font-size: 13pt; font-weight: 800; margin-top: 1.6mm; }
@@ -48,6 +48,24 @@
   .v .tick { margin-left: auto; width: 5mm; height: 5mm; border-radius: 50%; border: 0.5mm solid #E4E8F0; flex: none; }
   .v.navy .tick { background: #4ADE80; border: 0; color: #0B1220; font-size: 8pt; font-weight: 900; text-align: center; line-height: 5mm; }
 
+  .hero { margin-top: 6mm; }
+  .hero h1 { font-size: 21pt; font-weight: 800; line-height: 1.3; }
+  .hero h1 span { color: #E8460C; }
+  .hero p { font-size: 10pt; font-weight: 600; color: #1C1C1C; margin-top: 2mm; line-height: 1.5; }
+  .route { padding: 3.5mm 4mm; margin-top: 5mm; }
+  .route .r { display: flex; align-items: center; gap: 2.5mm; font-size: 11pt; }
+  .route .dot { width: 3.2mm; height: 3.2mm; border-radius: 50%; border: 0.9mm solid #4ADE80; }
+  .route .sq { width: 3mm; height: 3mm; border-radius: 0.6mm; background: #E53935; }
+  .route .dash { flex: 1; height: 0.7mm; border-radius: 1mm; background: linear-gradient(90deg, rgba(255,255,255,.1), #fff, rgba(255,255,255,.1)); }
+  .chips { display: flex; gap: 2mm; margin-top: 3mm; }
+  .chips span { background: rgba(255,255,255,.1); border-radius: 4mm; padding: 1.2mm 2.6mm; font-size: 8pt; font-weight: 700; }
+  .label.ta { letter-spacing: 0; text-transform: none; font-size: 9pt; margin-bottom: 4.5mm; margin-top: 5mm; }
+  .steps { display: flex; gap: 2.5mm; }
+  .st { flex: 1; position: relative; text-align: center; padding: 5mm 2mm 4mm; }
+  .st em { position: absolute; top: -2.2mm; left: 50%; transform: translateX(-50%); width: 5.5mm; height: 5.5mm; border-radius: 50%; background: #1B2A4A; color: #fff; font-style: normal; font-weight: 900; font-size: 8pt; line-height: 5.5mm; }
+  .st .e { display: block; font-size: 20pt; }
+  .st b { display: block; font-size: 9.5pt; margin-top: 1mm; }
+  .st span { font-size: 7.5pt; font-weight: 500; color: #1C1C1C; }
   .scan { display: flex; align-items: center; gap: 4mm; padding: 3.5mm; margin-top: auto; }
   .scan .qr { background: #fff; border-radius: 3mm; padding: 1.5mm; flex: none; }
   .scan .qr img { width: 29mm; height: 29mm; display: block; }
@@ -64,35 +82,37 @@
     <img class="logo" src="jurto_logo.webp" alt="JURTO">
   </div>
 
-  <div class="hi">
-    <div class="wave">👋</div>
-    <div><h1>வணக்கம்! இன்னைக்கு<br>என்ன அனுப்பணும்?</h1><p>பைக் முதல் லாரி வரை, சென்னை முழுக்க door-to-door டெலிவரி.</p></div>
+  <div class="hero">
+    <h1>சிறுத்தை வேகத்துல<br><span>சென்னை முழுக்க டெலிவரி!</span></h1>
+    <p>பார்சல் முதல் வீடு மாற்றம் வரை. சில நிமிஷத்துல book பண்ணுங்க, டிரைவர் வந்து எடுத்துட்டு போவார்.</p>
   </div>
 
-  <div class="card search"><span>🔍</span><span class="q">எங்க அனுப்பணும்?</span><span class="later">📅 Later</span></div>
+  <div class="navy route">
+    <div class="r"><i class="dot"></i><b>Pickup</b><span class="dash"></span><b>Drop</b><i class="sq"></i></div>
+    <div class="chips"><span>⚡ நிமிஷத்துல Book</span><span>📍 Live tracking</span><span>🏍️ Bike to 🚛 Truck</span></div>
+  </div>
+
+  <div class="label ta">3 step, அவ்வளவு தான்!</div>
+  <div class="steps">
+    <div class="card st"><em>1</em><span class="e">📍</span><b>Pickup &amp; drop</b><span>இடத்தை போடுங்க</span></div>
+    <div class="card st"><em>2</em><span class="e">🚚</span><b>வண்டி</b><span>Fare உடனே தெரியும்</span></div>
+    <div class="card st"><em>3</em><span class="e">⚡</span><b>Done!</b><span>Live-ஆ track பண்ணுங்க</span></div>
+  </div>
 
   <div class="label">Offers &amp; updates</div>
   <div class="offer">
     <span class="chip">🎁 JURTO</span>
-    <h2>🪔 தீபாவளி offer: ₹100 off</h2>
-    <p>முதல் booking-க்கு மட்டும்</p>
+    <h2>முதல் booking-க்கு ₹100 off</h2>
+    <p>Code-ஐ app-ல போடுங்க</p>
     <span class="code">DIWALI100</span>
-  </div>
-
-  <div class="label">Choose your vehicle</div>
-  <div class="vlist">
-    <div class="card v"><span class="ic" style="background:#FFECEC"><img src="bike.svg" alt=""></span><div><b>Bike</b><span>சின்ன பார்சல் • 20 kg வரை</span></div><span class="tick"></span></div>
-    <div class="card v"><span class="ic" style="background:#FFF6DC"><img src="auto.svg" alt=""></span><div><b>Auto</b><span>Quick &amp; easy • 300 kg வரை</span></div><span class="tick"></span></div>
-    <div class="navy v"><span class="ic" style="background:#fff"><img src="ace.svg" alt=""></span><div><b>Tata Ace</b><span>கடை சாமான் • 750 kg வரை</span></div><span class="tick">✓</span></div>
-    <div class="card v"><span class="ic" style="background:#E6EEFF"><img src="truck.svg" alt=""></span><div><b>Tata 407</b><span>வீடு மாற்றம் • 2500 kg வரை</span></div><span class="tick"></span></div>
   </div>
 
   <div class="navy scan">
     <div class="qr"><img src="qr-whatsapp.svg" alt="QR WhatsApp"></div>
-    <div><h3>Scan பண்ணி<br>WhatsApp-ல பேசுங்க!</h3><p>+91 81899 46159</p><span class="btn">Chat now →</span></div>
+    <div><h3>Scan பண்ணுங்க,<br>WhatsApp-லயே Book!</h3><p>+91 81899 46159</p><span class="btn">Chat now →</span></div>
   </div>
 
-  <div class="foot">Fare முன்னாடியே தெரியும் • Live tracking • தமிழ் &amp; English</div>
+  <div class="foot">jurto.in • WhatsApp 81899 46159 • தமிழ் &amp; English app</div>
 </div>
 </body>
 </html>
