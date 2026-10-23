@@ -22,7 +22,7 @@ if (/[?&]t=/.test(location.search)) location.replace('track.html' + location.sea
 <meta property="og:image" content="https://jurto.in/img/og.jpg">
 <meta property="og:type" content="website">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"LocalBusiness","name":"JURTO","alternateName":"JURTO Logistics Services","url":"https://jurto.in/","logo":"https://jurto.in/img/icon-192.png","image":"https://jurto.in/img/og.jpg","description":"Goods delivery across Chennai: bike, auto, Tata Ace, pickup and Tata 407, with live tracking.","email":"jurtologisticsservices@gmail.com","address":{"@type":"PostalAddress","addressLocality":"Chennai","addressRegion":"Tamil Nadu","addressCountry":"IN"},"areaServed":{"@type":"City","name":"Chennai"}}
+{"@context":"https://schema.org","@type":"LocalBusiness","name":"JURTO","alternateName":"JURTO Logistics Services","url":"https://jurto.in/","logo":"https://jurto.in/img/icon-192.png","image":"https://jurto.in/img/og.jpg","description":"Goods delivery across Chennai: bike, auto, Tata Ace, pickup and Tata 407, with live tracking.","email":"jurtologisticsservices@gmail.com","sameAs":["https://www.instagram.com/jurto_india/"],"address":{"@type":"PostalAddress","addressLocality":"Chennai","addressRegion":"Tamil Nadu","addressCountry":"IN"},"areaServed":{"@type":"City","name":"Chennai"}}
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -193,7 +193,7 @@ nav.top .call{padding:10px 16px;font-size:14px}
 @media (max-width:900px){.faq{grid-template-columns:1fr;gap:16px}}
 
 /* contact */
-.contact{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;max-width:780px}
+.contact{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
 @media (max-width:820px){.contact{grid-template-columns:1fr}}
 .ccard{display:flex;gap:16px;align-items:center;text-decoration:none;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px;transition:transform .15s,border-color .15s}
 .ccard:hover{transform:translateY(-2px);border-color:var(--orange)}
@@ -208,6 +208,10 @@ footer ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
 footer a{text-decoration:none;color:#C9D1E0}
 footer a:hover{color:var(--amber)}
 footer .logo{color:#fff;margin-bottom:12px}
+.social{display:flex;gap:10px;margin-top:18px}
+.social a{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:#fff}
+.social a:hover{background:var(--orange);border-color:var(--orange);color:#fff}
+.social svg.i{width:20px;height:20px}
 footer .copy{padding-top:24px}
 @media (max-width:720px){.fgrid{grid-template-columns:1fr}}
 
@@ -226,6 +230,7 @@ footer .copy{padding-top:24px}
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="i-phone" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></symbol>
   <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.8 7L4 20l1.1-4.6A8 8 0 1 1 21 12Z"/></symbol>
+  <symbol id="i-insta" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".6" fill="currentColor"/></symbol>
   <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></symbol>
   <symbol id="i-rupee" viewBox="0 0 24 24"><path d="M6 4h12M6 9h12M14 20 7 13h2a4.5 4.5 0 0 0 0-9"/></symbol>
   <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12Z"/><circle cx="12" cy="9" r="2.5"/></symbol>
@@ -442,6 +447,7 @@ footer .copy{padding-top:24px}
     <div class="contact">
       <a class="ccard reveal" href="https://wa.me/918189946159" target="_blank" rel="noopener"><div class="ico"><svg class="i"><use href="#i-chat"/></svg></div><div><b>WhatsApp</b><span data-t="c2d">Chat with our team</span></div></a>
       <a class="ccard reveal" href="mailto:jurtologisticsservices@gmail.com"><div class="ico"><svg class="i"><use href="#i-mail"/></svg></div><div><b data-t="c3">Email</b><span>jurtologisticsservices@gmail.com</span></div></a>
+      <a class="ccard reveal" href="https://www.instagram.com/jurto_india/" target="_blank" rel="noopener"><div class="ico"><svg class="i"><use href="#i-insta"/></svg></div><div><b>Instagram</b><span>@jurto_india</span></div></a>
     </div>
   </div>
 </section>
@@ -453,6 +459,7 @@ footer .copy{padding-top:24px}
         <a class="logo" href="#"><img src="img/icon-192.png" alt="">JURTO</a>
         <div data-t="ft_about">Goods delivery across Chennai. Bike to truck, booked in minutes.</div>
         <span class="play" aria-disabled="true"><svg viewBox="0 0 24 26" aria-hidden="true"><path d="M1.2.6 13.4 12.8 1.2 25a1.6 1.6 0 0 1-.6-1.3V1.9c0-.5.2-1 .6-1.3Z" fill="#00D7FE"/><path d="m17.5 8.7-4.1 4.1 4.1 4.1 4.7-2.7c1.3-.8 1.3-2 0-2.8l-4.7-2.7Z" fill="#FFCE00"/><path d="M17.5 16.9 13.4 12.8 1.2 25c.5.5 1.2.5 2 .1l14.3-8.2Z" fill="#FF3A44"/><path d="M17.5 8.7 3.2.5C2.4 0 1.7.1 1.2.6l12.2 12.2 4.1-4.1Z" fill="#00F076"/></svg><span><small data-t="play_soon">Coming soon on</small><b>Google Play</b></span></span>
+        <div class="social"><a href="https://www.instagram.com/jurto_india/" target="_blank" rel="noopener" aria-label="JURTO on Instagram"><svg class="i"><use href="#i-insta"/></svg></a><a href="https://wa.me/918189946159" target="_blank" rel="noopener" aria-label="JURTO on WhatsApp"><svg class="i"><use href="#i-chat"/></svg></a></div>
       </div>
       <div>
         <h4 data-t="ft_co">Company</h4>
