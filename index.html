@@ -100,16 +100,21 @@ nav.top .call{padding:10px 16px;font-size:14px}
 @media (max-width:900px){.hero{padding:56px 0 72px}.hero .wrap{grid-template-columns:1fr}.f1{left:-24px}.f2{right:-24px}}
 @media (max-width:420px){.f1{left:-8px}.f2{right:-8px}}
 
+.play{display:inline-flex;align-items:center;gap:12px;margin-top:18px;padding:9px 18px 9px 14px;border-radius:12px;background:#000;border:1px solid rgba(255,255,255,.22);color:#fff;text-decoration:none;line-height:1.15}
+.play svg{width:24px;height:26px;flex:none}
+.play small{display:block;font-size:10.5px;letter-spacing:.6px;text-transform:uppercase;opacity:.75}
+.play b{display:block;font-size:17px;font-weight:700}
+.play[aria-disabled="true"]{cursor:default}
+
 /* vehicles */
 .veh{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
 @media (max-width:900px){.veh{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:460px){.veh{grid-template-columns:1fr}}
 .vcard{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:26px 22px;box-shadow:var(--shadow);transition:transform .2s,border-color .2s}
 .vcard:hover{transform:translateY(-3px);border-color:rgba(255,106,0,.45)}
-.vcard .art{height:84px;display:flex;align-items:flex-end;margin-bottom:18px;color:var(--navy)}
-:root[data-theme="dark"] .vcard .art{color:#9FB2D6}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .vcard .art{color:#9FB2D6}}
-.vcard .art svg{height:100%;width:auto}
+.vcard .art{height:128px;border-radius:16px;background:var(--tint);display:grid;place-items:center;margin-bottom:18px;overflow:hidden}
+.vcard .art img{width:78%;max-width:180px;transition:transform .3s}
+.vcard:hover .art img{transform:translateX(6px)}
 .vcard h3{margin:0 0 6px;font-size:18px;font-weight:700}
 .vcard p{margin:0;color:var(--muted);font-size:14.5px}
 .vcard .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
@@ -272,6 +277,7 @@ footer .copy{padding-top:24px}
         <a class="btn btn-main" href="https://wa.me/918189946159" target="_blank" rel="noopener"><svg class="i"><use href="#i-chat"/></svg><span data-t="cta_wa">WhatsApp us</span></a>
         <a class="btn btn-ghost" href="#services"><span data-t="cta_svc">Our services</span></a>
       </div>
+      <span class="play" aria-disabled="true"><svg viewBox="0 0 24 26" aria-hidden="true"><path d="M1.2.6 13.4 12.8 1.2 25a1.6 1.6 0 0 1-.6-1.3V1.9c0-.5.2-1 .6-1.3Z" fill="#00D7FE"/><path d="m17.5 8.7-4.1 4.1 4.1 4.1 4.7-2.7c1.3-.8 1.3-2 0-2.8l-4.7-2.7Z" fill="#FFCE00"/><path d="M17.5 16.9 13.4 12.8 1.2 25c.5.5 1.2.5 2 .1l14.3-8.2Z" fill="#FF3A44"/><path d="M17.5 8.7 3.2.5C2.4 0 1.7.1 1.2.6l12.2 12.2 4.1-4.1Z" fill="#00F076"/></svg><span><small data-t="play_soon">Coming soon on</small><b>Google Play</b></span></span>
       <div class="trust">
         <div><svg class="i"><use href="#i-rupee"/></svg><span data-t="tr1">Fare shown up front</span></div>
         <div><svg class="i"><use href="#i-pin"/></svg><span data-t="tr2">Live tracking</span></div>
@@ -293,25 +299,25 @@ footer .copy{padding-top:24px}
     <p class="sub reveal" data-t="veh_sub">From a small parcel to a full house shift: pick the vehicle that fits and see the fare before you book.</p>
     <div class="veh">
       <div class="vcard reveal">
-        <div class="art"><svg viewBox="0 0 120 70" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="52" r="13"/><circle cx="96" cy="52" r="13"/><path d="M24 52 44 30h26l10 22M58 30l-6-12H40M80 52h16M70 30l14-10h8"/><rect x="36" y="14" width="22" height="16" rx="3" fill="#FF6A00" stroke="#FF6A00"/></svg></div>
+        <div class="art" style="--tint:#FFECEC"><img src="img/v/bike.svg" alt="Bike" width="160" height="110" loading="lazy"></div>
         <h3 data-t="v1">Bike</h3>
         <p data-t="v1d">Parcels, documents, food and small packages.</p>
         <div class="tags"><span data-t="v1t">Quick</span><span data-t="v1t2">Small loads</span></div>
       </div>
       <div class="vcard reveal">
-        <div class="art"><svg viewBox="0 0 120 70" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M14 52V26c0-8 10-16 26-16h22l14 14h24a6 6 0 0 1 6 6v22"/><path d="M62 10v42M14 52h12M42 52h44M102 52h4"/><circle cx="34" cy="53" r="8"/><circle cx="94" cy="53" r="8"/><rect x="66" y="28" width="34" height="16" rx="3" fill="#FF6A00" stroke="#FF6A00"/></svg></div>
+        <div class="art" style="--tint:#FFF6DC"><img src="img/v/auto.svg" alt="Auto" width="160" height="110" loading="lazy"></div>
         <h3 data-t="v2">Auto &amp; E-Auto</h3>
         <p data-t="v2d">Shop stock, cartons and medium loads.</p>
         <div class="tags"><span data-t="v2t">Shops</span><span data-t="v2t2">Cartons</span></div>
       </div>
       <div class="vcard reveal">
-        <div class="art"><svg viewBox="0 0 120 70" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M8 50V20h62v30M70 28h20l14 14v8H70"/><path d="M76 30v12h22"/><circle cx="28" cy="53" r="8"/><circle cx="90" cy="53" r="8"/><path d="M8 50h12M36 50h46M98 50h6"/><rect x="16" y="26" width="18" height="16" rx="2" fill="#FF6A00" stroke="#FF6A00"/><rect x="40" y="30" width="22" height="12" rx="2" fill="#FFB020" stroke="#FFB020"/></svg></div>
+        <div class="art" style="--tint:#F0F3F7"><img src="img/v/ace.svg" alt="Tata Ace" width="160" height="110" loading="lazy"></div>
         <h3 data-t="v3">Tata Ace &amp; Super Ace</h3>
         <p data-t="v3d">Appliances, furniture and business deliveries.</p>
         <div class="tags"><span data-t="v3t">Furniture</span><span data-t="v3t2">Appliances</span></div>
       </div>
       <div class="vcard reveal">
-        <div class="art"><svg viewBox="0 0 120 70" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 50V12h76v38M80 22h18l16 16v12H80"/><path d="M86 24v14h24"/><circle cx="22" cy="53" r="8"/><circle cx="40" cy="53" r="8"/><circle cx="98" cy="53" r="8"/><path d="M4 50h10M48 50h42M106 50h8"/><path d="M14 20h56v22H14z" fill="#FF6A00" stroke="#FF6A00" opacity=".9"/></svg></div>
+        <div class="art" style="--tint:#E6EEFF"><img src="img/v/truck.svg" alt="Tata 407" width="160" height="110" loading="lazy"></div>
         <h3 data-t="v4">Pickup 8ft / 9ft &amp; Tata 407</h3>
         <p data-t="v4d">House shifting, bulk goods and big loads.</p>
         <div class="tags"><span data-t="v4t">House shifting</span><span data-t="v4t2">Bulk</span></div>
@@ -444,6 +450,7 @@ footer .copy{padding-top:24px}
       <div>
         <a class="logo" href="#"><img src="img/icon-192.png" alt="">JURTO</a>
         <div data-t="ft_about">Goods delivery across Chennai. Bike to truck, booked in minutes.</div>
+        <span class="play" aria-disabled="true"><svg viewBox="0 0 24 26" aria-hidden="true"><path d="M1.2.6 13.4 12.8 1.2 25a1.6 1.6 0 0 1-.6-1.3V1.9c0-.5.2-1 .6-1.3Z" fill="#00D7FE"/><path d="m17.5 8.7-4.1 4.1 4.1 4.1 4.7-2.7c1.3-.8 1.3-2 0-2.8l-4.7-2.7Z" fill="#FFCE00"/><path d="M17.5 16.9 13.4 12.8 1.2 25c.5.5 1.2.5 2 .1l14.3-8.2Z" fill="#FF3A44"/><path d="M17.5 8.7 3.2.5C2.4 0 1.7.1 1.2.6l12.2 12.2 4.1-4.1Z" fill="#00F076"/></svg><span><small data-t="play_soon">Coming soon on</small><b>Google Play</b></span></span>
       </div>
       <div>
         <h4 data-t="ft_co">Company</h4>
@@ -479,7 +486,7 @@ const TA = {
   nav_veh: 'வாகனங்கள்', nav_svc: 'சேவைகள்', nav_biz: 'வணிகங்களுக்கு', nav_drive: 'டிரைவராக சேருங்கள்', nav_faq: 'கேள்விகள்', nav_contact: 'தொடர்பு', nav_call: 'வாட்ஸ்அப்',
   hero_pill: 'பைக் முதல் லாரி வரை, சரக்கு டெலிவரி', hero_h1a: 'உங்கள் சரக்கு,', hero_h1b: 'எங்கள் பொறுப்பு.',
   hero_lead: 'பைக், ஆட்டோ, டாடா ஏஸ், பிக்கப் அல்லது லாரியை சில நொடிகளில் புக் செய்யுங்கள். புக் செய்வதற்கு முன்பே கட்டணம் தெரியும், உங்கள் பொருள் வீடு சேரும் வரை நேரலையில் பாருங்கள்.',
-  cta_wa: 'வாட்ஸ்அப்பில் பேசுங்கள்', cta_svc: 'எங்கள் சேவைகள்',
+  cta_wa: 'வாட்ஸ்அப்பில் பேசுங்கள்', cta_svc: 'எங்கள் சேவைகள்', play_soon: 'விரைவில்',
   tr1: 'முன்கூட்டியே கட்டணம்', tr2: 'நேரலை டிராக்கிங்', tr3: 'பிக்கப் OTP',
   fl1: 'OTP சரிபார்க்கப்பட்டது', fl1s: 'பொருள் ஏற்றப்பட்டது', fl2: 'வழியில் உள்ளது', fl2s: 'மேப்பில் நேரலையாக',
   veh_eye: 'எங்கள் வாகனங்கள்', veh_h: 'ஒவ்வொரு சுமைக்கும் சரியான வாகனம்', veh_sub: 'சிறிய பார்சல் முதல் முழு வீடு மாற்றம் வரை: பொருத்தமான வாகனத்தைத் தேர்ந்தெடுத்து, புக் செய்வதற்கு முன் கட்டணத்தைப் பாருங்கள்.',
