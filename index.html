@@ -20,7 +20,7 @@ if (/[?&]t=/.test(location.search)) location.replace('track.html' + location.sea
 <meta property="og:image" content="https://jurto.in/img/og.jpg">
 <meta property="og:type" content="website">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"LocalBusiness","name":"JURTO","alternateName":"JURTO Logistics Services","url":"https://jurto.in/","logo":"https://jurto.in/img/icon-192.png","image":"https://jurto.in/img/og.jpg","description":"Goods delivery across Chennai: bike, auto, Tata Ace, pickup and Tata 407, with live tracking.","telephone":"+91-81899-46159","email":"jurtologisticsservices@gmail.com","address":{"@type":"PostalAddress","addressLocality":"Chennai","addressRegion":"Tamil Nadu","addressCountry":"IN"},"areaServed":{"@type":"City","name":"Chennai"}}
+{"@context":"https://schema.org","@type":"LocalBusiness","name":"JURTO","alternateName":"JURTO Logistics Services","url":"https://jurto.in/","logo":"https://jurto.in/img/icon-192.png","image":"https://jurto.in/img/og.jpg","description":"Goods delivery across Chennai: bike, auto, Tata Ace, pickup and Tata 407, with live tracking.","email":"jurtologisticsservices@gmail.com","address":{"@type":"PostalAddress","addressLocality":"Chennai","addressRegion":"Tamil Nadu","addressCountry":"IN"},"areaServed":{"@type":"City","name":"Chennai"}}
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -186,7 +186,7 @@ nav.top .call{padding:10px 16px;font-size:14px}
 @media (max-width:900px){.faq{grid-template-columns:1fr;gap:16px}}
 
 /* contact */
-.contact{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.contact{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;max-width:780px}
 @media (max-width:820px){.contact{grid-template-columns:1fr}}
 .ccard{display:flex;gap:16px;align-items:center;text-decoration:none;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px;transition:transform .15s,border-color .15s}
 .ccard:hover{transform:translateY(-2px);border-color:var(--orange)}
@@ -258,7 +258,7 @@ footer .copy{padding-top:24px}
       <button type="button" data-lang="en" aria-pressed="true">EN</button>
       <button type="button" data-lang="ta" aria-pressed="false">தமிழ்</button>
     </div>
-    <a class="btn btn-main call" href="tel:+918189946159" aria-label="Call JURTO"><svg class="i"><use href="#i-phone"/></svg><span data-t="nav_call">Call us</span></a>
+    <a class="btn btn-main call" href="https://wa.me/918189946159" target="_blank" rel="noopener" aria-label="WhatsApp JURTO"><svg class="i"><use href="#i-chat"/></svg><span data-t="nav_call">WhatsApp</span></a>
   </div>
 </nav>
 
@@ -269,8 +269,8 @@ footer .copy{padding-top:24px}
       <h1><span data-t="hero_h1a">Move What</span> <span class="hl" data-t="hero_h1b">Matters.</span></h1>
       <p class="lead" data-t="hero_lead">Book a bike, auto, Tata Ace, pickup or truck in a few taps. See the fare before you book and track your goods live until they reach the door.</p>
       <div class="ctas">
-        <a class="btn btn-main" href="tel:+918189946159"><svg class="i"><use href="#i-phone"/></svg><span data-t="cta_call">Call +91 81899 46159</span></a>
-        <a class="btn btn-ghost" href="https://wa.me/918189946159" target="_blank" rel="noopener"><svg class="i"><use href="#i-chat"/></svg><span data-t="cta_wa">WhatsApp us</span></a>
+        <a class="btn btn-main" href="https://wa.me/918189946159" target="_blank" rel="noopener"><svg class="i"><use href="#i-chat"/></svg><span data-t="cta_wa">WhatsApp us</span></a>
+        <a class="btn btn-ghost" href="#services"><span data-t="cta_svc">Our services</span></a>
       </div>
       <div class="trust">
         <div><svg class="i"><use href="#i-rupee"/></svg><span data-t="tr1">Fare shown up front</span></div>
@@ -381,7 +381,7 @@ footer .copy{padding-top:24px}
       <div class="reveal"><svg class="i"><use href="#i-stops"/></svg><b data-t="b1">Multi-stop trips</b><span data-t="b1d">Up to 3 extra stops in one booking.</span></div>
       <div class="reveal"><svg class="i"><use href="#i-cal"/></svg><b data-t="b2">Schedule ahead</b><span data-t="b2d">Plan pickups up to 7 days before.</span></div>
       <div class="reveal"><svg class="i"><use href="#i-share"/></svg><b data-t="b3">Tracking for your customer</b><span data-t="b3d">Share a live link with whoever receives the goods.</span></div>
-      <div class="reveal"><svg class="i"><use href="#i-headset"/></svg><b data-t="b4">Direct support</b><span data-t="b4d">Call or WhatsApp our Chennai team.</span></div>
+      <div class="reveal"><svg class="i"><use href="#i-headset"/></svg><b data-t="b4">Direct support</b><span data-t="b4d">WhatsApp or email our Chennai team.</span></div>
     </div>
   </div>
 </section>
@@ -412,7 +412,7 @@ footer .copy{padding-top:24px}
     <div>
       <div class="eyebrow reveal" data-t="faq_eye">FAQ</div>
       <h2 class="reveal" data-t="faq_h">Questions, answered</h2>
-      <p class="sub reveal" data-t="faq_sub">Can't find what you need? Call or WhatsApp us.</p>
+      <p class="sub reveal" data-t="faq_sub">Can't find what you need? WhatsApp or email us.</p>
     </div>
     <div>
       <details><summary data-t="q1">Which areas do you cover?</summary><p data-t="a1">JURTO delivers goods across Chennai.</p></details>
@@ -430,9 +430,8 @@ footer .copy{padding-top:24px}
   <div class="wrap">
     <div class="eyebrow reveal" data-t="c_eye">Contact</div>
     <h2 class="reveal" data-t="c_h">Need to move something today?</h2>
-    <p class="sub reveal" data-t="c_sub">Call or message us and we will get a vehicle to you.</p>
+    <p class="sub reveal" data-t="c_sub">Message us on WhatsApp and we will get a vehicle to you.</p>
     <div class="contact">
-      <a class="ccard reveal" href="tel:+918189946159"><div class="ico"><svg class="i"><use href="#i-phone"/></svg></div><div><b data-t="c1">Call us</b><span>+91 81899 46159</span></div></a>
       <a class="ccard reveal" href="https://wa.me/918189946159" target="_blank" rel="noopener"><div class="ico"><svg class="i"><use href="#i-chat"/></svg></div><div><b>WhatsApp</b><span data-t="c2d">Chat with our team</span></div></a>
       <a class="ccard reveal" href="mailto:jurtologisticsservices@gmail.com"><div class="ico"><svg class="i"><use href="#i-mail"/></svg></div><div><b data-t="c3">Email</b><span>jurtologisticsservices@gmail.com</span></div></a>
     </div>
@@ -477,10 +476,10 @@ document.getElementById('yr').textContent = new Date().getFullYear();
 
 // Tamil / English. English lives in the markup; Tamil comes from this table.
 const TA = {
-  nav_veh: 'வாகனங்கள்', nav_svc: 'சேவைகள்', nav_biz: 'வணிகங்களுக்கு', nav_drive: 'டிரைவராக சேருங்கள்', nav_faq: 'கேள்விகள்', nav_contact: 'தொடர்பு', nav_call: 'அழைக்க',
+  nav_veh: 'வாகனங்கள்', nav_svc: 'சேவைகள்', nav_biz: 'வணிகங்களுக்கு', nav_drive: 'டிரைவராக சேருங்கள்', nav_faq: 'கேள்விகள்', nav_contact: 'தொடர்பு', nav_call: 'வாட்ஸ்அப்',
   hero_pill: 'பைக் முதல் லாரி வரை, சரக்கு டெலிவரி', hero_h1a: 'உங்கள் சரக்கு,', hero_h1b: 'எங்கள் பொறுப்பு.',
   hero_lead: 'பைக், ஆட்டோ, டாடா ஏஸ், பிக்கப் அல்லது லாரியை சில நொடிகளில் புக் செய்யுங்கள். புக் செய்வதற்கு முன்பே கட்டணம் தெரியும், உங்கள் பொருள் வீடு சேரும் வரை நேரலையில் பாருங்கள்.',
-  cta_call: 'அழைக்க +91 81899 46159', cta_wa: 'வாட்ஸ்அப்பில் பேசுங்கள்',
+  cta_wa: 'வாட்ஸ்அப்பில் பேசுங்கள்', cta_svc: 'எங்கள் சேவைகள்',
   tr1: 'முன்கூட்டியே கட்டணம்', tr2: 'நேரலை டிராக்கிங்', tr3: 'பிக்கப் OTP',
   fl1: 'OTP சரிபார்க்கப்பட்டது', fl1s: 'பொருள் ஏற்றப்பட்டது', fl2: 'வழியில் உள்ளது', fl2s: 'மேப்பில் நேரலையாக',
   veh_eye: 'எங்கள் வாகனங்கள்', veh_h: 'ஒவ்வொரு சுமைக்கும் சரியான வாகனம்', veh_sub: 'சிறிய பார்சல் முதல் முழு வீடு மாற்றம் வரை: பொருத்தமான வாகனத்தைத் தேர்ந்தெடுத்து, புக் செய்வதற்கு முன் கட்டணத்தைப் பாருங்கள்.',
@@ -509,10 +508,10 @@ const TA = {
   b1: 'பல இட பயணங்கள்', b1d: 'ஒரே புக்கிங்கில் 3 கூடுதல் இடங்கள் வரை.',
   b2: 'முன்கூட்டியே திட்டமிடல்', b2d: '7 நாட்கள் முன்பே பிக்கப் திட்டமிடுங்கள்.',
   b3: 'உங்கள் வாடிக்கையாளருக்கு டிராக்கிங்', b3d: 'பொருளைப் பெறுபவருடன் நேரலை லிங்க் பகிருங்கள்.',
-  b4: 'நேரடி உதவி', b4d: 'எங்கள் சென்னை குழுவை அழையுங்கள் அல்லது வாட்ஸ்அப் செய்யுங்கள்.',
+  b4: 'நேரடி உதவி', b4d: 'எங்கள் சென்னை குழுவுக்கு வாட்ஸ்அப் அல்லது மின்னஞ்சல் செய்யுங்கள்.',
   d_h: 'JURTO-வுடன் ஓட்டுங்கள். உங்கள் நேரத்தில் சம்பாதியுங்கள்.', d_sub: 'பைக், ஆட்டோ, டாடா ஏஸ், பிக்கப் அல்லது 407 இருக்கிறதா? JURTO Partner-ல் சேர்ந்து உங்கள் அருகில் டெலிவரி ஆர்டர்களைப் பெறுங்கள்.',
   d1: 'விரும்பும் நேரத்தில் ஆன்லைன்', d2: 'ஏற்கும் முன் வருமானம் தெரியும்', d3: 'தினசரி போனஸ் இலக்குகள்', d4: 'வங்கி அல்லது UPI-க்கு பணம் எடுக்கலாம்', d5: '7 கி.மீ-க்குள் ஆர்டர்கள்', d6: 'தமிழ் & ஆங்கிலத்தில் ஆப்', d_cta: 'டிரைவராக சேருங்கள்',
-  faq_eye: 'கேள்விகள்', faq_h: 'உங்கள் கேள்விகளுக்கு பதில்கள்', faq_sub: 'தேவையானது கிடைக்கவில்லையா? எங்களை அழையுங்கள் அல்லது வாட்ஸ்அப் செய்யுங்கள்.',
+  faq_eye: 'கேள்விகள்', faq_h: 'உங்கள் கேள்விகளுக்கு பதில்கள்', faq_sub: 'தேவையானது கிடைக்கவில்லையா? எங்களுக்கு வாட்ஸ்அப் அல்லது மின்னஞ்சல் செய்யுங்கள்.',
   q1: 'எந்த பகுதிகளில் சேவை உள்ளது?', a1: 'JURTO சென்னை முழுவதும் சரக்கு டெலிவரி செய்கிறது.',
   q2: 'கட்டணம் எப்படி தெரியும்?', a2: 'புக் செய்வதற்கு முன்பே ஒவ்வொரு வாகனத்தின் கட்டணத்தையும் ஆப் காட்டும். பயணத்திற்குப் பிறகு எதிர்பாராத கட்டணம் இல்லை.',
   q3: 'எப்படி பணம் செலுத்தலாம்?', a3: 'கேஷ், JURTO வாலட், UPI, கார்டு அல்லது நெட்பேங்கிங். ஆன்லைன் பணம் Razorpay மூலம் செல்கிறது.',
@@ -520,8 +519,8 @@ const TA = {
   q5: 'ஒன்றுக்கு மேற்பட்ட இடங்களுக்கு டெலிவரி செய்யலாமா?', a5: 'ஆம். ஒரே பயணத்தில் 3 கூடுதல் இடங்கள் சேர்க்கலாம்.',
   q6: 'என் பொருள் எப்படி பாதுகாப்பாக இருக்கும்?', a6: 'டிரைவர்கள் லைசென்ஸ், RC புக் மற்றும் அடையாள அட்டை மூலம் சரிபார்க்கப்படுகிறார்கள். நீங்கள் பிக்கப் OTP கொடுத்த பிறகுதான் பொருள் ஒப்படைக்கப்படும், பயணத்தை நேரலையில் பார்க்கலாம்.',
   q7: 'JURTO டிரைவர் ஆவது எப்படி?', a7: 'JURTO Partner ஆப்பில் உங்கள் மொபைல் எண்ணுடன் பதிவு செய்து, லைசென்ஸ், RC புக் மற்றும் அடையாள சான்றைச் சேர்த்து, சரிபார்ப்புக்குப் பிறகு ஆன்லைனில் வாருங்கள்.',
-  c_eye: 'தொடர்பு', c_h: 'இன்றே ஏதாவது அனுப்ப வேண்டுமா?', c_sub: 'எங்களை அழையுங்கள் அல்லது மெசேஜ் செய்யுங்கள், உங்களுக்கு வாகனம் அனுப்புகிறோம்.',
-  c1: 'அழையுங்கள்', c2d: 'எங்கள் குழுவுடன் பேசுங்கள்', c3: 'மின்னஞ்சல்',
+  c_eye: 'தொடர்பு', c_h: 'இன்றே ஏதாவது அனுப்ப வேண்டுமா?', c_sub: 'வாட்ஸ்அப்பில் மெசேஜ் செய்யுங்கள், உங்களுக்கு வாகனம் அனுப்புகிறோம்.',
+  c2d: 'எங்கள் குழுவுடன் பேசுங்கள்', c3: 'மின்னஞ்சல்',
   ft_about: 'சென்னை முழுவதும் சரக்கு டெலிவரி. பைக் முதல் லாரி வரை, சில நிமிடங்களில் புக்கிங்.', ft_co: 'நிறுவனம்', ft_legal: 'சட்டம்', ft_priv: 'தனியுரிமைக் கொள்கை', ft_terms: 'சேவை விதிமுறைகள்', ft_del: 'கணக்கை நீக்க'
 };
 const nodes = [...document.querySelectorAll('[data-t]')];
