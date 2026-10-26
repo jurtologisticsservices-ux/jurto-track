@@ -210,6 +210,90 @@ footer .copy{padding-top:18px}
 .tiles>*,.biz>*,.biz .list>*,.drive>*{min-width:0}
 html[lang="ta"] h1,html[lang="ta"] h2,html[lang="ta"] h3,html[lang="ta"] p{overflow-wrap:break-word}
 
+/* compact: same Apple look, smaller scale */
+body{font-size:15px}
+.wrap{max-width:980px}
+.wide{max-width:1080px}
+section{padding:64px 0}
+.eyebrow{font-size:15px;margin:0 0 4px}
+h2{font-size:clamp(26px,3.6vw,38px)}
+html[lang="ta"] h2{font-size:clamp(21px,2.8vw,29px)}
+.sub{font-size:clamp(15px,1.6vw,17px);margin-top:10px;max-width:600px}
+.btn{padding:9px 18px;font-size:15px}
+.more{font-size:15px}
+.ctas{margin-top:20px;gap:22px}
+.hero{padding:48px 0 0}
+.hero .eyebrow{font-size:clamp(15px,1.7vw,18px)}
+.hero h1{font-size:clamp(38px,6.2vw,64px)}
+html[lang="ta"] .hero h1{font-size:clamp(26px,4.4vw,44px)}
+.hero .sub{font-size:clamp(16px,1.8vw,19px);max-width:600px}
+.play{margin-top:16px;padding:5px 13px 5px 10px}
+.play b{font-size:14px}
+.stage{width:min(250px,62vw);margin-top:40px}
+.phone{border-radius:40px;padding:9px}
+.phone img{border-radius:32px}
+.highlights{gap:20px}
+.highlights svg.i{width:30px;height:30px;margin-bottom:10px}
+.highlights b{font-size:16px}
+.highlights span{font-size:13px}
+.tiles{margin-top:36px;gap:14px}
+.tile{padding:24px 22px;border-radius:22px}
+.tile h3{font-size:19px}
+.tile p{font-size:15px;margin-top:6px}
+.tile .ic{width:34px;height:34px;margin-bottom:14px}
+.veh .tile{padding:22px 16px}
+.veh .art{height:84px;margin-bottom:14px}
+.veh .art img{height:66px}
+.shots{margin-top:40px;gap:18px}
+.shots img{width:min(200px,38vw);border-radius:30px;border-width:7px}
+.shots img:nth-child(2){margin-top:44px}
+.features{margin-top:48px;gap:28px 26px}
+.features div{padding-top:16px}
+.features svg.i{width:22px;height:22px;margin-bottom:8px}
+.features b{font-size:16px}
+.features span{font-size:13.5px}
+.steps .n{font-size:44px;margin-bottom:10px}
+.biz{margin-top:36px;gap:14px}
+.biz .lead{padding:32px 30px;border-radius:22px;gap:22px}
+.biz .lead h3{font-size:clamp(22px,2.6vw,30px)}
+.biz .lead p{font-size:15px}
+.biz .list{gap:14px}
+.biz .list .tile{padding:18px 20px;gap:14px}
+.biz .list .tile .ic{width:26px;height:26px}
+.biz .list .tile h3{font-size:16px}
+.biz .list .tile p{font-size:13.5px}
+.drive{gap:40px}
+.plist{margin:22px 0 26px;gap:12px 20px}
+.plist li{font-size:14.5px}
+.drive img{width:min(220px,60vw);border-radius:34px;border-width:7px}
+.faq{margin-top:32px;max-width:720px}
+.faq summary{font-size:16px;padding:16px 0}
+.faq summary::after{font-size:24px}
+.faq details p{font-size:15px;margin-bottom:16px}
+.contact .tile h3{font-size:17px}
+.contact .tile p{font-size:13.5px}
+nav.top .links{gap:24px}
+.wa{width:48px;height:48px}.wa svg{width:25px;height:25px}
+@media (max-width:734px){
+  section{padding:48px 0}
+  .hero{padding:36px 0 0}
+  .tiles{margin-top:28px}
+}
+@media (max-width:480px){
+  .tile{padding:18px 16px;border-radius:18px}
+  .tile h3{font-size:16px}
+  .tile p{font-size:13px}
+  .veh .tile{padding:16px 10px}
+  .veh .art{height:64px;margin-bottom:8px}
+  .veh .art img{height:50px}
+  .steps .n{font-size:34px;margin-bottom:6px}
+  .highlights b{font-size:15px}
+  .features{gap:22px 16px}
+  .features b{font-size:14.5px}
+  .features span{font-size:12.5px}
+  .shots img{width:40vw;border-radius:24px;border-width:6px}
+}
+
 /* scroll-in */
 .reveal{opacity:0;transform:translateY(40px);transition:opacity 1s cubic-bezier(.2,.8,.2,1),transform 1s cubic-bezier(.2,.8,.2,1)}
 .reveal.in{opacity:1;transform:none}
