@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <script>
@@ -12,7 +12,7 @@ if (/[?&]t=/.test(location.search)) location.replace('track.html' + location.sea
 <link rel="canonical" href="https://jurto.in/">
 <meta property="og:url" content="https://jurto.in/">
 <meta property="og:site_name" content="JURTO">
-<meta name="theme-color" content="#0B1220">
+<meta name="theme-color" content="#080D18">
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" type="image/png" sizes="96x96" href="/img/icon-96.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/img/icon-192.png">
@@ -317,6 +317,41 @@ nav.top .wrap{height:58px}
   .partner img{width:150px}
   .stage{width:min(190px,50vw)}
 }
+
+/* premium dark polish */
+:root{--bg:#080D18;--soft:#0B1222;--card:#0F1729;--line:rgba(255,255,255,.08);--ink:#EEF1F6;--muted:#9AA4B6}
+body{background:#080D18}
+section{position:relative}
+section.alt{background:linear-gradient(180deg,#0B1222,#0A1020);border-top:1px solid rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.05)}
+section:not(.alt):not(.biz)::before{content:"";position:absolute;inset:0;background:radial-gradient(700px 300px at 85% 0,rgba(255,106,0,.06),transparent 70%);pointer-events:none}
+h2{background:linear-gradient(180deg,#fff,#C9D1E0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.partner h2{background:none;color:#fff}
+.eyebrow{text-shadow:0 0 18px rgba(255,106,0,.45)}
+.vcard,.scard,.step,.ccard{background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 18px 40px rgba(0,0,0,.25);transition:transform .25s,border-color .25s,box-shadow .25s}
+.vcard:hover,.scard:hover,.step:hover,.ccard:hover{transform:translateY(-4px);border-color:rgba(255,106,0,.45);box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 22px 50px rgba(255,106,0,.12)}
+.ico{background:rgba(255,106,0,.12);border:1px solid rgba(255,106,0,.25)}
+.step .ico{background:linear-gradient(135deg,#FF8A00,#FF4D1F);border:0;box-shadow:0 8px 20px rgba(255,106,0,.35)}
+.step .n{color:rgba(255,255,255,.35)}
+.vcard .tags span{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1);color:#AEB7C7}
+.flist svg.i{color:#FFB020}
+.shots::before{background:radial-gradient(closest-side,rgba(255,106,0,.25),transparent)}
+.shots img{border-color:#121B2E;box-shadow:0 30px 60px rgba(0,0,0,.5)}
+.faq details{border-bottom:1px solid rgba(255,255,255,.08)}
+.faq summary::after{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1)}
+nav.top{transition:background .3s,box-shadow .3s}
+nav.top.scrolled{background:rgba(8,13,24,.95);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.btn-main{background:linear-gradient(135deg,#FF8A00,#FF5A1F)}
+.trustbar{background:#0A1020;border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06)}
+.trustbar .wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;padding-top:22px;padding-bottom:22px}
+.trustbar .wrap>div{display:flex;gap:12px;align-items:center}
+.trustbar svg.i{color:#FFB020;width:26px;height:26px;padding:8px;box-sizing:content-box;border-radius:12px;background:rgba(255,176,32,.1)}
+.trustbar b{display:block;font-size:14px;color:#fff}
+.trustbar small{display:block;font-size:12px;color:#8F99AC;line-height:1.35}
+@media (max-width:900px){.trustbar .wrap{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.trustbar .wrap{gap:14px 10px;padding-top:16px;padding-bottom:16px}.trustbar svg.i{width:20px;height:20px;padding:6px}.trustbar b{font-size:13px}.trustbar small{font-size:11px}}
+footer{background:#060A13;border-top:1px solid rgba(255,255,255,.06)}
+.vcard .art img{height:74px;width:auto;max-width:86%;max-height:none}
+@media (max-width:520px){.vcard .art img{height:58px}}
 </style>
 </head>
 <body>
@@ -393,6 +428,15 @@ nav.top .wrap{height:58px}
     </div>
   </div>
 </header>
+
+<div class="trustbar">
+  <div class="wrap">
+    <div><svg class="i"><use href="#i-shield"/></svg><span><b data-t="tz1">Verified drivers</b><small data-t="tz1s">Licence, RC & ID checked</small></span></div>
+    <div><svg class="i"><use href="#i-check"/></svg><span><b data-t="tz2">Pickup OTP</b><small data-t="tz2s">Goods go only with your driver</small></span></div>
+    <div><svg class="i"><use href="#i-wallet"/></svg><span><b data-t="tz3">Secure payments</b><small data-t="tz3s">UPI, cards & netbanking via Razorpay</small></span></div>
+    <div><svg class="i"><use href="#i-headset"/></svg><span><b data-t="tz4">Chennai support</b><small data-t="tz4s">Real people on WhatsApp</small></span></div>
+  </div>
+</div>
 
 <section id="vehicles">
   <div class="wrap">
@@ -584,6 +628,8 @@ nav.top .wrap{height:58px}
 
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
+const nav = document.querySelector('nav.top');
+addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 8), { passive: true });
 
 // Tamil / English. English lives in the markup; Tamil comes from this table.
 const TA = {
@@ -632,6 +678,7 @@ const TA = {
   q7: 'JURTO டிரைவர் ஆவது எப்படி?', a7: 'JURTO Partner ஆப்பில் உங்கள் மொபைல் எண்ணுடன் பதிவு செய்து, லைசென்ஸ், RC புக் மற்றும் அடையாள சான்றைச் சேர்த்து, சரிபார்ப்புக்குப் பிறகு ஆன்லைனில் வாருங்கள்.',
   c_eye: 'தொடர்பு', c_h: 'இன்றே ஏதாவது அனுப்ப வேண்டுமா?', c_sub: 'வாட்ஸ்அப்பில் மெசேஜ் செய்யுங்கள், உங்களுக்கு வாகனம் அனுப்புகிறோம்.',
   c2d: 'எங்கள் குழுவுடன் பேசுங்கள்', c3: 'மின்னஞ்சல்',
+  tz1: 'சரிபார்க்கப்பட்ட டிரைவர்கள்', tz1s: 'லைசென்ஸ், RC & அடையாள அட்டை சரிபார்ப்பு', tz2: 'பிக்கப் OTP', tz2s: 'உங்கள் டிரைவரிடம் மட்டுமே பொருள்', tz3: 'பாதுகாப்பான பணம்', tz3s: 'Razorpay மூலம் UPI, கார்டு & நெட்பேங்கிங்', tz4: 'சென்னை உதவி', tz4s: 'வாட்ஸ்அப்பில் உண்மையான மனிதர்கள்',
   ft_about: 'சென்னை முழுவதும் சரக்கு டெலிவரி. பைக் முதல் லாரி வரை, சில நிமிடங்களில் புக்கிங்.', ft_co: 'நிறுவனம்', ft_legal: 'சட்டம்', ft_priv: 'தனியுரிமைக் கொள்கை', ft_terms: 'சேவை விதிமுறைகள்', ft_del: 'கணக்கை நீக்க'
 };
 const nodes = [...document.querySelectorAll('[data-t]')];
