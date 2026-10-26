@@ -294,6 +294,34 @@ nav.top .links{gap:24px}
   .shots img{width:40vw;border-radius:24px;border-width:6px}
 }
 
+
+/* iPhone 18-style frame: titanium edge, thin black bezel, Dynamic Island, status bar, side buttons */
+.iphone{position:relative;z-index:1;width:100%;padding:3px;border-radius:15.5%/7.2%;
+  background:linear-gradient(135deg,#d8d9dc 0%,#8e9095 18%,#f2f2f4 35%,#7d7f84 55%,#c9cacd 75%,#6f7176 100%);
+  box-shadow:0 0 0 1px rgba(0,0,0,.25),0 50px 90px -24px rgba(0,0,0,.4)}
+.iphone .screen{position:relative;overflow:hidden;background:#fff;border-radius:14.6%/6.8%;border:6px solid #050505}
+.iphone .screen img{display:block;width:100%;border-radius:0}
+.sbar{position:relative;display:flex;align-items:center;justify-content:space-between;height:8.5cqw;min-height:22px;padding:0 9%;background:#fff;color:#000;font:600 11px/1 -apple-system,"SF Pro Text","Inter",sans-serif;letter-spacing:0}
+.iphone{container-type:inline-size}
+.sbar{height:11cqw;font-size:4.6cqw}
+.sbar i{display:flex;gap:1.6cqw;align-items:center;font-style:normal}
+.sbar svg{height:3.4cqw;width:auto;fill:#000;stroke:none}
+.sbar .bat{width:7cqw;height:3.4cqw;border:1.2px solid rgba(0,0,0,.45);border-radius:1.2cqw;padding:1px;display:flex}
+.sbar .bat span{flex:1;background:#000;border-radius:.6cqw}
+.island{position:absolute;left:50%;top:2.6cqw;transform:translateX(-50%);width:30%;height:8.6cqw;background:#000;border-radius:999px}
+.btn-l,.btn-r{position:absolute;width:3px;background:linear-gradient(90deg,#6f7176,#c9cacd);border-radius:2px}
+.btn-l{left:-2px;top:18%;height:7%;box-shadow:0 calc(100% + 40%) 0 #9a9ca0}
+.btn-r{right:-2px;top:24%;height:11%}
+.btn-l::after{content:"";position:absolute;left:0;top:190%;width:3px;height:100%;background:inherit;border-radius:2px}
+.stage .iphone{box-shadow:0 0 0 1px rgba(0,0,0,.25),0 50px 100px -20px rgba(0,0,0,.35)}
+.shots .iphone{width:min(200px,38vw);flex:none}
+.shots .iphone:nth-child(2){margin-top:44px}
+.dark .iphone{box-shadow:0 0 0 1px rgba(255,255,255,.08),0 40px 80px rgba(0,0,0,.6)}
+.drive .iphone{width:min(220px,60vw);margin:0 auto}
+@media (max-width:480px){.shots .iphone{width:40vw}.iphone .screen{border-width:4px}}
+.shots{align-items:flex-start}
+.iphone .screen img,.shots .iphone img,.drive .iphone img{width:100%;max-width:none;margin:0;border:0;border-radius:0;box-shadow:none}
+
 /* scroll-in */
 .reveal{opacity:0;transform:translateY(40px);transition:opacity 1s cubic-bezier(.2,.8,.2,1),transform 1s cubic-bezier(.2,.8,.2,1)}
 .reveal.in{opacity:1;transform:none}
@@ -361,7 +389,7 @@ nav.top .links{gap:24px}
     </div>
     <span class="play reveal" aria-disabled="true"><svg viewBox="0 0 24 26" aria-hidden="true"><path d="M1.2.6 13.4 12.8 1.2 25a1.6 1.6 0 0 1-.6-1.3V1.9c0-.5.2-1 .6-1.3Z" fill="#00D7FE"/><path d="m17.5 8.7-4.1 4.1 4.1 4.1 4.7-2.7c1.3-.8 1.3-2 0-2.8l-4.7-2.7Z" fill="#FFCE00"/><path d="M17.5 16.9 13.4 12.8 1.2 25c.5.5 1.2.5 2 .1l14.3-8.2Z" fill="#FF3A44"/><path d="M17.5 8.7 3.2.5C2.4 0 1.7.1 1.2.6l12.2 12.2 4.1-4.1Z" fill="#00F076"/></svg><span><small data-t="play_soon">Coming soon on</small><b>Google Play</b></span></span>
     <div class="stage reveal">
-      <div class="phone"><img src="img/home.jpg" alt="JURTO app home screen" width="480" height="960"></div>
+      <div class="iphone"><span class="btn-l"></span><span class="btn-r"></span><div class="screen"><div class="sbar"><b>9:41</b><span class="island"></span><i><svg viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx=".8"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8"/><rect x="10" y="3" width="3" height="9" rx=".8"/><rect x="15" y="0" width="3" height="12" rx=".8"/></svg><svg viewBox="0 0 16 12"><path d="M8 11.5 5.6 9a3.4 3.4 0 0 1 4.8 0L8 11.5Zm-4.2-4.3L2.2 5.6a8.2 8.2 0 0 1 11.6 0l-1.6 1.6a5.9 5.9 0 0 0-8.4 0ZM.6 3.9-1 2.3" /><path d="M.4 3.8a11 11 0 0 1 15.2 0L14 5.4a8.7 8.7 0 0 0-12 0Z"/></svg><span class="bat"><span></span></span></i></div><img src="img/home.jpg" alt="JURTO app home screen" width="480" height="960"></div></div>
     </div>
   </div>
 </header>
@@ -397,8 +425,8 @@ nav.top .links{gap:24px}
     <h2 class="reveal" data-t="live_h">Watch every delivery. Live.</h2>
     <p class="sub reveal" data-t="live_sub">Follow your driver on the map from pickup to door, and share the live link with whoever receives the goods.</p>
     <div class="shots reveal">
-      <img src="img/vehicle.jpg" alt="Choose a vehicle and see the fare" loading="lazy" width="480" height="960">
-      <img src="img/confirm.jpg" alt="Confirm booking" loading="lazy" width="480" height="960">
+      <div class="iphone"><span class="btn-l"></span><span class="btn-r"></span><div class="screen"><div class="sbar"><b>9:41</b><span class="island"></span><i><svg viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx=".8"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8"/><rect x="10" y="3" width="3" height="9" rx=".8"/><rect x="15" y="0" width="3" height="12" rx=".8"/></svg><svg viewBox="0 0 16 12"><path d="M8 11.5 5.6 9a3.4 3.4 0 0 1 4.8 0L8 11.5Zm-4.2-4.3L2.2 5.6a8.2 8.2 0 0 1 11.6 0l-1.6 1.6a5.9 5.9 0 0 0-8.4 0ZM.6 3.9-1 2.3" /><path d="M.4 3.8a11 11 0 0 1 15.2 0L14 5.4a8.7 8.7 0 0 0-12 0Z"/></svg><span class="bat"><span></span></span></i></div><img src="img/vehicle.jpg" alt="Choose a vehicle and see the fare" loading="lazy" width="480" height="960"></div></div>
+      <div class="iphone"><span class="btn-l"></span><span class="btn-r"></span><div class="screen"><div class="sbar"><b>9:41</b><span class="island"></span><i><svg viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx=".8"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8"/><rect x="10" y="3" width="3" height="9" rx=".8"/><rect x="15" y="0" width="3" height="12" rx=".8"/></svg><svg viewBox="0 0 16 12"><path d="M8 11.5 5.6 9a3.4 3.4 0 0 1 4.8 0L8 11.5Zm-4.2-4.3L2.2 5.6a8.2 8.2 0 0 1 11.6 0l-1.6 1.6a5.9 5.9 0 0 0-8.4 0ZM.6 3.9-1 2.3" /><path d="M.4 3.8a11 11 0 0 1 15.2 0L14 5.4a8.7 8.7 0 0 0-12 0Z"/></svg><span class="bat"><span></span></span></i></div><img src="img/confirm.jpg" alt="Confirm booking" loading="lazy" width="480" height="960"></div></div>
     </div>
     <div class="features" style="text-align:left">
       <div class="reveal"><svg class="i"><use href="#i-rupee"/></svg><b data-t="f1">Fare shown up front</b><span data-t="f1d">No surprise charges after the trip.</span></div>
@@ -476,7 +504,7 @@ nav.top .links{gap:24px}
       </ul>
       <div class="reveal"><a class="btn" href="https://wa.me/918189946159" target="_blank" rel="noopener"><span data-t="d_cta">Join as a driver</span></a></div>
     </div>
-    <img class="reveal" src="img/partner.jpg" alt="JURTO Partner app" loading="lazy" width="480" height="960">
+    <div class="iphone reveal"><span class="btn-l"></span><span class="btn-r"></span><div class="screen"><div class="sbar"><b>9:41</b><span class="island"></span><i><svg viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx=".8"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8"/><rect x="10" y="3" width="3" height="9" rx=".8"/><rect x="15" y="0" width="3" height="12" rx=".8"/></svg><svg viewBox="0 0 16 12"><path d="M8 11.5 5.6 9a3.4 3.4 0 0 1 4.8 0L8 11.5Zm-4.2-4.3L2.2 5.6a8.2 8.2 0 0 1 11.6 0l-1.6 1.6a5.9 5.9 0 0 0-8.4 0ZM.6 3.9-1 2.3" /><path d="M.4 3.8a11 11 0 0 1 15.2 0L14 5.4a8.7 8.7 0 0 0-12 0Z"/></svg><span class="bat"><span></span></span></i></div><img src="img/partner.jpg" alt="JURTO Partner app" loading="lazy" width="480" height="960"></div></div>
   </div>
 </section>
 
